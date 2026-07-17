@@ -1,0 +1,50 @@
+name: بناء المنصة تلقائياً
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: استخدام Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          
+      - name: إنشاء جميع الملفات المفقودة (Backend + Frontend)
+        run: |
+          mkdir -p src/routers frontend/app frontend/utils prisma
+          
+          echo '{"name":"asiri-capital","version":"1.0.0","scripts":{"dev":"tsx watch src/server.ts","build":"tsc","start":"node dist/server.js"},"dependencies":{"@prisma/client":"^5.0.0","@trpc/server":"^10.45.0","axios":"^1.6.0","bcryptjs":"^2.4.3","cors":"^2.8.5","dotenv":"^16.0.3","express":"^4.18.2","node-cache":"^5.1.2","nodemailer":"^6.9.0","zod":"^3.22.0"},"devDependencies":{"@types/bcryptjs":"^2.4.6","@types/cors":"^2.8.13","@types/express":"^4.17.17","@types/node":"^20.0.0","@types/nodemailer":"^6.4.14","prisma":"^5.0.0","tsx":"^4.0.0","typescript":"^5.0.0"}}' > package.json
+          
+          echo '{"compilerOptions":{"target":"ES2020","module":"commonjs","rootDir":"./src","outDir":"./dist","strict":true,"esModuleInterop":true,"skipLibCheck":true,"forceConsistentCasingInFileNames":true},"include":["src/**/*"],"exclude":["node_modules","frontend"]}' > tsconfig.json
+          
+          echo "import { initTRPC } from '@trpc/server'; import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); export const createContext = () => ({ prisma }); const t = initTRPC.context().create(); export const router = t.router; export const publicProcedure = t.procedure;" > src/trpc.ts
+          
+          echo "import express from 'express'; import cors from 'cors'; import { router, createContext } from './trpc'; import * as trpcExpress from '@trpc/server/adapters/express'; import { stockRouter } from './routers/stock.router'; const app = express(); app.use(cors()); app.use(express.json()); const appRouter = router({ stock: stockRouter }); app.use('/trpc', trpcExpress.createExpressMiddleware({ router: appRouter, createContext })); app.listen(4000, () => console.log('🚀 Asiri Server running'));" > src/server.ts
+          
+          echo "import { router, publicProcedure } from '../trpc'; import { z } from 'zod'; import axios from 'axios'; export const stockRouter = router({ getQuote: publicProcedure.input(z.object({ symbol: z.string() })).query(async ({ input }) => { const res = await axios.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='+input.symbol+'&apikey=demo'); return res.data; }), });" > src/routers/stock.router.ts
+          
+          echo "generator client { provider = 'prisma-client-js' } datasource db { provider = 'mysql' url = env('DATABASE_URL') } model User { id String @id @default(cuid()) email String @unique }" > prisma/schema.prisma
+          
+          echo '{"name":"asiri-frontend","version":"1.0.0","private":true,"scripts":{"dev":"next dev","build":"next build"},"dependencies":{"@trpc/client":"^10.45.0","next":"14.0.0","react":"^18.2.0","react-dom":"^18.2.0","@tanstack/react-query":"^4.36.0","zod":"^3.22.0"},"devDependencies":{"@types/node":"^20.0.0","@types/react":"^18.2.0","typescript":"^5.0.0","tailwindcss":"^3.3.0","autoprefixer":"^10.4.0","postcss":"^8.4.0"}}' > frontend/package.json
+          
+          echo "'use client'; import { useState } from 'react'; export default function HomePage() { const [symbol, setSymbol] = useState('AAPL'); return <div><h1>🏦 ASIRI CAPITAL</h1><input value={symbol} onChange={(e)=>setSymbol(e.target.value)}/><p>مرحباً بك في منصة الأسهم الذكية</p></div>; }" > frontend/app/page.tsx
+
+      - name: تثبيت المكتبات وإنشاء ملف القفل
+        run: |
+          npm install
+          cd frontend && npm install && cd ..
+
+      - name: إعادة رفع الملفات المكتملة إلى المستودع
+        run: |
+          git config user.name "Asiri-Bot"
+          git config user.email "bot@asiri.com"
+          git add .
+          git commit -m "🤖 البناء التلقائي للمنصة بالكامل" || echo "لا توجد تغييرات"
+          git push
