@@ -1,4 +1,4 @@
-name: Deploy API Atlas
+name: Deploy API Atlas Live
 
 on:
   push:
@@ -10,7 +10,10 @@ on:
       - "styles.css"
       - "src/**"
       - "api-intelligence/**"
+      - "scripts/check-api-health.mjs"
       - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -31,6 +34,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run live API availability checks
+        run: |
+          node scripts/check-api-health.mjs \
+            --catalog api-intelligence/catalog.js \
+            --output api-intelligence/live-status.json \
+            --timeout-ms 12000 \
+            --concurrency 4
+          node -e "const x=require('./api-intelligence/live-status.json'); console.log(x.summary)"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
