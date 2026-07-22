@@ -1,135 +1,33 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#08111f" />
-  <meta name="description" content="Asiri Signal Lab — مختبر مستقل لقرارات الأسهم ببيانات محاكاة." />
-  <title>Asiri Signal Lab — Decision Cockpit</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="refresh" content="0; url=./api-intelligence/">
+  <title>API Atlas — Finance Edition</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #06101c; color: #f4f8ff; }
+    main { width: min(92vw, 520px); padding: 30px; text-align: center; border: 1px solid #23405d; border-radius: 24px; background: #0b1a2c; }
+    h1 { margin: 0 0 12px; }
+    p { color: #a9bfd3; line-height: 1.8; }
+    a { display: inline-block; margin-top: 10px; padding: 13px 20px; border-radius: 14px; background: #21a4c7; color: #04111b; font-weight: 800; text-decoration: none; }
+  </style>
+  <script>
+    const target = new URL('./api-intelligence/', window.location.href);
+    target.search = window.location.search;
+    target.hash = window.location.hash;
+    window.location.replace(target.href);
+  </script>
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">AS</div>
-      <div><strong>Asiri Signal Lab</strong><span>Decision Cockpit • MVP 0.1</span></div>
-    </div>
-    <div class="topbar-actions">
-      <span class="demo-chip"><i></i> وضع تجريبي مستقل</span>
-      <span class="session-chip">جلسة محاكاة • السوق الأمريكي</span>
-    </div>
-  </header>
-
-  <main class="app-shell">
-    <section class="hero-grid">
-      <article class="panel market-panel">
-        <div class="section-heading">
-          <div><span class="eyebrow">نبض السوق</span><h1 id="market-regime">—</h1></div>
-          <div class="market-orbit"><span></span></div>
-        </div>
-        <p id="market-note" class="muted"></p>
-        <div id="pulse-metrics" class="pulse-grid"></div>
-      </article>
-
-      <article class="panel selected-panel">
-        <div class="selected-topline">
-          <div>
-            <span class="eyebrow">الفرصة المحددة</span>
-            <div class="symbol-line"><h2 id="selected-symbol">—</h2><span id="selected-company">—</span></div>
-          </div>
-          <div class="selected-price"><strong id="selected-price">—</strong><span id="selected-change" class="positive">—</span></div>
-        </div>
-
-        <div class="decision-layout">
-          <div id="score-ring" class="score-ring" data-tone="neutral"><div><strong id="score-value">0</strong><span>Asiri Score</span></div></div>
-          <div class="decision-copy">
-            <span id="decision-badge" class="decision-badge">—</span>
-            <h3 id="decision-reason">—</h3>
-            <p id="setup-copy" class="muted">—</p>
-          </div>
-        </div>
-
-        <div class="trade-levels">
-          <div><span>الدخول</span><strong id="entry">—</strong></div>
-          <div><span>وقف الخسارة</span><strong id="stop">—</strong></div>
-          <div><span>الهدف 1</span><strong id="target1">—</strong></div>
-          <div><span>الهدف 2</span><strong id="target2">—</strong></div>
-          <div><span>R/R</span><strong id="rr">—</strong></div>
-          <div><span>RVol</span><strong id="rvol">—</strong></div>
-        </div>
-      </article>
-    </section>
-
-    <section class="workspace-grid">
-      <aside class="panel signals-panel">
-        <div class="section-heading compact">
-          <div><span class="eyebrow">الرادار</span><h2>أفضل الفرص التجريبية</h2></div>
-          <span class="count-chip">3</span>
-        </div>
-        <div id="risk-profiles" class="profile-switcher"></div>
-        <div id="signal-list" class="signal-list"></div>
-      </aside>
-
-      <section class="panel chart-panel">
-        <div class="section-heading compact">
-          <div><span class="eyebrow">Market Replay</span><h2>إعادة السوق دون معرفة المستقبل</h2></div>
-          <button id="replay-button" class="secondary-button" type="button">تشغيل إعادة السوق</button>
-        </div>
-        <div class="chart-wrap"><canvas id="replay-chart" aria-label="رسم شموع تجريبي"></canvas></div>
-        <div class="chart-footer">
-          <span><i class="dot up"></i> شمعة صاعدة</span>
-          <span><i class="dot down"></i> شمعة هابطة</span>
-          <span>البيانات محاكاة وليست سوقًا حيًا</span>
-        </div>
-      </section>
-
-      <aside class="panel golden-panel">
-        <div class="section-heading compact">
-          <div><span class="eyebrow gold-text">Golden Alert Gate</span><h2>بوابة الإشارة الذهبية</h2></div>
-          <strong id="golden-state" class="golden-inactive">—</strong>
-        </div>
-        <ul id="golden-checks" class="golden-checks"></ul>
-      </aside>
-    </section>
-
-    <section class="analysis-grid">
-      <article class="panel evidence-panel">
-        <div class="section-heading compact"><div><span class="eyebrow">Why This Decision?</span><h2>صندوق الأدلة</h2></div></div>
-        <div id="evidence-list" class="evidence-list"></div>
-      </article>
-
-      <article class="panel factor-panel">
-        <div class="section-heading compact"><div><span class="eyebrow">Score Anatomy</span><h2>تشريح النتيجة</h2></div></div>
-        <div id="factor-bars" class="factor-bars"></div>
-      </article>
-
-      <article class="panel risk-panel">
-        <div class="section-heading compact"><div><span class="eyebrow">Risk Engine</span><h2>حجم الصفقة المنضبط</h2></div></div>
-        <label class="capital-field"><span>رأس المال التجريبي بالدولار</span><input id="capital-input" type="number" min="0" step="100" value="5000" /></label>
-        <div class="risk-summary">
-          <div><span>نسبة المخاطرة</span><strong id="risk-percent">—</strong></div>
-          <div><span>الكمية المقترحة</span><strong id="position-qty">—</strong></div>
-          <div><span>قيمة المركز</span><strong id="position-value">—</strong></div>
-          <div><span>ميزانية الخطر</span><strong id="risk-budget">—</strong></div>
-        </div>
-        <button id="paper-trade-button" class="primary-button" type="button">تسجيل صفقة تجريبية</button>
-      </article>
-    </section>
-
-    <section class="panel paper-panel">
-      <div class="section-heading compact">
-        <div><span class="eyebrow">Paper Trading Journal</span><h2>سجل القرارات التجريبية</h2></div>
-        <div class="paper-stats"><span>الصفقات <strong id="paper-count">0</strong></span><span>إجمالي المراكز <strong id="paper-value">$0</strong></span></div>
-      </div>
-      <ul id="paper-log" class="paper-log"></ul>
-    </section>
+  <main>
+    <h1>API Atlas</h1>
+    <p>يتم فتح التطبيق الفعلي الآن…</p>
+    <a href="./api-intelligence/">فتح التطبيق</a>
   </main>
-
-  <footer><strong>Asiri Signal Lab</strong><span>مختبر هندسي مستقل — البيانات محاكاة ولا تمثل توصية استثمارية.</span></footer>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./src/app.js"></script>
 </body>
 </html>
