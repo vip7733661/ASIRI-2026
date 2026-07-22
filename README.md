@@ -36,6 +36,8 @@
 - عمل دون اتصال بعد أول زيارة.
 - تنبيه واضح بأن الإدراج لا يعني التحقق التشغيلي.
 
+[فتح API Atlas الرسمي](https://vip7733661.github.io/ASIRI-2026/)
+
 [تعليمات API Atlas](api-intelligence/README.md)
 
 ## التشغيل
