@@ -47,12 +47,41 @@ test('PWA shell references live verification assets', () => {
   assert.ok(manifest.icons.length >= 1);
 });
 
-test('fallback live-status file never invents provider results', () => {
+test('live-status is either an honest fallback or a complete verified snapshot', () => {
   const status = JSON.parse(fs.readFileSync(path.join(root, 'live-status.json'), 'utf8'));
+  const validStatuses = new Set(['operational', 'restricted', 'degraded', 'unavailable']);
+
   assert.equal(status.schemaVersion, 1);
-  assert.equal(status.generatedAt, null);
-  assert.deepEqual(status.services, {});
   assert.equal(status.summary.total, catalog.items.length);
+
+  if (status.generatedAt === null) {
+    assert.deepEqual(status.services, {});
+    assert.equal(status.summary.operational, 0);
+    assert.equal(status.summary.restricted, 0);
+    assert.equal(status.summary.degraded, 0);
+    assert.equal(status.summary.unavailable, 0);
+    return;
+  }
+
+  assert.ok(Number.isFinite(Date.parse(status.generatedAt)), 'generatedAt must be a valid timestamp');
+  assert.equal(Object.keys(status.services).length, catalog.items.length);
+
+  for (const item of catalog.items) {
+    const result = status.services[item.id];
+    assert.ok(result, `missing live result for ${item.id}`);
+    assert.equal(result.id, item.id);
+    assert.ok(validStatuses.has(result.status), `invalid status for ${item.id}`);
+    assert.ok(Number.isFinite(result.latencyMs) && result.latencyMs >= 0);
+    assert.ok(Number.isFinite(Date.parse(result.checkedAt)), `invalid checkedAt for ${item.id}`);
+  }
+
+  const classifiedTotal = status.summary.operational
+    + status.summary.restricted
+    + status.summary.degraded
+    + status.summary.unavailable;
+  assert.equal(classifiedTotal, status.summary.total);
+  assert.ok(status.summary.operationalRate >= 0 && status.summary.operationalRate <= 100);
+  assert.ok(status.summary.reachabilityRate >= 0 && status.summary.reachabilityRate <= 100);
 });
 
 test('service worker uses network-first for live status', () => {
