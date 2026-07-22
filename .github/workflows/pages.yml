@@ -31,6 +31,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,7 +52,8 @@ jobs:
             --concurrency 4
           node -e "const x=require('./api-intelligence/live-status.json'); console.log(x.summary)"
 
-      - name: Persist latest live results
+      - name: Persist latest live results when permitted
+        continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -72,6 +74,11 @@ jobs:
           mkdir -p _site
           cp index.html signal-lab.html styles.css _site/
           cp -R src api-intelligence _site/
+
+      - name: Verify generated live payload
+        run: |
+          test -s _site/api-intelligence/live-status.json
+          node -e "const x=require('./_site/api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1); console.log(x.generatedAt, x.summary)"
 
       - name: Upload complete site tree
         uses: actions/upload-pages-artifact@v4
