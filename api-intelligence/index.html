@@ -7,12 +7,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="API Atlas">
-  <meta name="description" content="دليل مستقل للبحث في APIs المالية المجانية أو ذات الخطة المجانية.">
+  <meta name="description" content="دليل حي لقياس توفر وزمن استجابة APIs المالية.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="styles.css">
-  <title>API Atlas — Finance Edition</title>
+  <title>API Atlas — Live Finance Edition</title>
 </head>
 <body>
   <a class="skip-link" href="#catalog">انتقل إلى الدليل</a>
@@ -24,23 +24,30 @@
       </div>
       <div class="hero-copy">
         <p class="kicker">API Intelligence Lab</p>
-        <h1>API Atlas <span>Finance Edition</span></h1>
-        <p>تطبيق مستقل للبحث والمقارنة الأولية بين واجهات البيانات المالية المدرجة في مستودع <strong>public-apis</strong>.</p>
+        <h1>API Atlas <span>Live Finance Edition</span></h1>
+        <p>لوحة حية لفحص توفر وزمن استجابة واجهات البيانات المالية المدرجة في مستودع <strong>public-apis</strong>.</p>
       </div>
       <div class="hero-actions">
-        <button class="primary-button" id="downloadButton" type="button">تحميل الدليل JSON</button>
+        <button class="primary-button" id="refreshStatusButton" type="button">تحديث الحالة الحية</button>
+        <button class="secondary-button" id="downloadButton" type="button">تحميل التقرير JSON</button>
         <button class="secondary-button" id="shareButton" type="button">مشاركة التطبيق</button>
+      </div>
+      <div id="liveBanner" class="live-banner" role="status" aria-live="polite">
+        <div><span class="live-pulse"></span><strong id="liveBannerTitle">جارٍ تحميل آخر فحص حي…</strong></div>
+        <span id="lastCheckedLabel">—</span>
       </div>
       <div class="source-note">
         <strong>تنبيه منهجي:</strong>
-        الإدراج لا يعني أن الخدمة تعمل حاليًا أو أنها مجانية بالكامل أو مناسبة للاستخدام التجاري. جميع الخدمات تحتاج اختبارًا مستقلًا قبل الاعتماد.
+        الحالة الحية تقيس الوصول وزمن الاستجابة ورمز HTTP فقط. لا تثبت دقة الأسعار أو حداثة بيانات السوق أو ملاءمة الاستخدام التجاري.
       </div>
     </header>
 
-    <section class="stats" aria-label="ملخص الدليل">
+    <section class="stats" aria-label="ملخص الحالة الحية">
       <article><span>الخدمات</span><strong id="totalCount">0</strong></article>
-      <article><span>دون مفتاح</span><strong id="noKeyCount">0</strong></article>
-      <article><span>تدعم HTTPS</span><strong id="httpsCount">0</strong></article>
+      <article><span>تعمل الآن</span><strong id="operationalCount">—</strong></article>
+      <article><span>قابلة للوصول</span><strong id="reachabilityRate">—</strong></article>
+      <article><span>مقيدة أو محمية</span><strong id="restrictedCount">—</strong></article>
+      <article><span>بدون مفتاح</span><strong id="noKeyCount">0</strong></article>
       <article><span>المفضلة</span><strong id="favoriteCount">0</strong></article>
     </section>
 
@@ -56,7 +63,9 @@
       <div class="select-wrap">
         <label for="sortSelect">الترتيب</label>
         <select id="sortSelect">
-          <option value="score">الأعلى تقييمًا</option>
+          <option value="health">الحالة الحية</option>
+          <option value="latency">الأسرع استجابة</option>
+          <option value="score">Catalog Score</option>
           <option value="name">الاسم</option>
           <option value="auth">سهولة المصادقة</option>
         </select>
@@ -65,8 +74,9 @@
 
     <section class="chips" aria-label="فلاتر سريعة">
       <button class="chip active" data-filter="all" type="button">الكل</button>
+      <button class="chip" data-filter="operational" type="button">تعمل الآن</button>
       <button class="chip" data-filter="no-key" type="button">بدون API Key</button>
-      <button class="chip" data-filter="cors" type="button">CORS: Yes</button>
+      <button class="chip" data-filter="cors" type="button">CORS مكتشف</button>
       <button class="chip" data-filter="market" type="button">بيانات سوق</button>
       <button class="chip" data-filter="official" type="button">مصادر رسمية</button>
       <button class="chip" data-filter="favorites" type="button">المفضلة</button>
@@ -75,7 +85,7 @@
     <section id="catalog" class="catalog-section">
       <div class="section-heading">
         <div>
-          <p class="kicker">Finance Catalog</p>
+          <p class="kicker">Live Finance Catalog</p>
           <h2>الخدمات المتاحة</h2>
         </div>
         <span id="resultCount" class="result-count">0 نتيجة</span>
@@ -89,16 +99,16 @@
 
     <section class="methodology">
       <div>
-        <p class="kicker">Catalog Score</p>
-        <h2>ماذا يعني التقييم؟</h2>
+        <p class="kicker">Live Verification</p>
+        <h2>ماذا تقيس الأرقام؟</h2>
       </div>
-      <p>التقييم داخل التطبيق يقيس سهولة الاكتشاف والتكامل الأولي فقط: HTTPS، نوع المصادقة، CORS، وجود خطة مجانية ووثائق. لا يقيس دقة البيانات أو سرعة التحديث أو صلاحية الاستخدام التجاري.</p>
+      <p>يعمل الفحص من GitHub Actions كل ست ساعات. يقيس استجابة رابط التوثيق الرسمي لكل مزود، ويختبر Endpoint بيانات فعليًا عندما يتوفر مسار آمن بلا مفتاح. حالات 401 و403 و429 تعني أن الخدمة قابلة للوصول لكنها محمية أو محدودة، وليست متوقفة بالضرورة.</p>
     </section>
 
     <footer>
-      <span>API Atlas — Finance Edition</span>
-      <span>مصدر البيانات: public-apis/public-apis · MIT</span>
-      <span>لا تداول · لا وساطة · لا توصيات</span>
+      <span>API Atlas — Live Finance Edition</span>
+      <span>مصدر الدليل: public-apis/public-apis · MIT</span>
+      <span>تحديث تلقائي كل 6 ساعات · لا تداول · لا توصيات</span>
     </footer>
   </main>
 
@@ -134,6 +144,10 @@
       </div>
       <p class="description"></p>
       <div class="badges"></div>
+      <div class="health-row">
+        <span class="health-state"><i></i><strong></strong></span>
+        <span class="latency-value">—</span>
+      </div>
       <div class="score-row">
         <span>Catalog Score</span>
         <strong class="score-value"></strong>
