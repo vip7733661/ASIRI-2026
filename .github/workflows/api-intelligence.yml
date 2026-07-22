@@ -49,3 +49,26 @@ jobs:
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/catalog.js | grep -q "public-apis/public-apis"
+
+  live-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Execute real provider probes
+        run: |
+          node scripts/check-api-health.mjs \
+            --catalog api-intelligence/catalog.js \
+            --output /tmp/live-status.json \
+            --timeout-ms 12000 \
+            --concurrency 4
+          cat /tmp/live-status.json
+      - name: Upload live result artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-atlas-live-status
+          path: /tmp/live-status.json
+          retention-days: 3
