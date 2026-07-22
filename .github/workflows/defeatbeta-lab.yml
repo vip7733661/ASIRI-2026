@@ -1,0 +1,33 @@
+name: DefeatBeta Lab
+
+on:
+  push:
+    paths:
+      - "defeatbeta_lab/**"
+      - "tests/test_defeatbeta_core.py"
+      - ".github/workflows/defeatbeta-lab.yml"
+  pull_request:
+    paths:
+      - "defeatbeta_lab/**"
+      - "tests/test_defeatbeta_core.py"
+      - ".github/workflows/defeatbeta-lab.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: defeatbeta_lab/requirements-test.txt
+      - name: Install test dependencies
+        run: python -m pip install -r defeatbeta_lab/requirements-test.txt
+      - name: Compile Python package
+        run: python -m compileall -q defeatbeta_lab
+      - name: Run quality-engine tests
+        run: python -m pytest tests/test_defeatbeta_core.py -q
