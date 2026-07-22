@@ -6,9 +6,13 @@
 
 ## المعاينة المباشرة
 
-[افتح Asiri Signal Lab — Decision Cockpit](https://cdn.jsdelivr.net/gh/vip7733661/ASIRI-2026@a04a7c2260d7dffd8560c1d24b4f7abbd09d7fad/index.html)
+[افتح Asiri Signal Lab — Decision Cockpit](https://raw.githack.com/vip7733661/ASIRI-2026/main/index.html)
 
-كما أضيف مسار نشر تلقائي عبر GitHub Pages لكل تحديث جديد على فرع `main`.
+هذا الرابط يعرض HTML وCSS وJavaScript بصيغ المحتوى الصحيحة بدل إظهار ملف HTML كنص خام.
+
+كما يوجد مسار نشر رسمي عبر GitHub Pages على الرابط المتوقع:
+
+`https://vip7733661.github.io/ASIRI-2026/`
 
 ## ما الذي يعمل الآن؟
 
