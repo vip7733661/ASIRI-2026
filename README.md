@@ -24,6 +24,20 @@
 - Paper Trading Journal داخل الجلسة.
 - اختبارات آلية لمحرك التقييم والمخاطر.
 
+## API Atlas — Finance Edition
+
+تطبيق PWA مستقل مبني فوق عينة من قسم التمويل في `public-apis/public-apis`:
+
+- 16 خدمة مالية منظمة.
+- بحث وفلاتر وترتيب.
+- مفضلة محفوظة على الجهاز.
+- تنزيل الدليل بصيغة JSON.
+- تثبيت على الشاشة الرئيسية.
+- عمل دون اتصال بعد أول زيارة.
+- تنبيه واضح بأن الإدراج لا يعني التحقق التشغيلي.
+
+[تعليمات API Atlas](api-intelligence/README.md)
+
 ## التشغيل
 
 لا توجد تبعيات خارجية للواجهة.
@@ -38,12 +52,19 @@ npm start
 http://localhost:4173
 ```
 
+لتشغيل API Atlas منفردًا:
+
+```bash
+python3 -m http.server 4174 --directory api-intelligence
+```
+
 يمكن أيضًا فتح `index.html` عبر أي خادم ملفات محلي.
 
 ## الفحص والاختبارات
 
 ```bash
 npm run check
+node --test tests/api-intelligence.test.mjs
 ```
 
 ## هيكل المشروع
@@ -53,11 +74,19 @@ ASIRI-2026/
 ├── index.html
 ├── styles.css
 ├── package.json
+├── api-intelligence/
+│   ├── index.html
+│   ├── styles.css
+│   ├── app.js
+│   ├── catalog.js
+│   ├── manifest.webmanifest
+│   └── sw.js
 ├── src/
 │   ├── app.js
 │   ├── demo-data.js
 │   └── scoring-engine.js
 └── tests/
+    ├── api-intelligence.test.mjs
     └── scoring-engine.test.mjs
 ```
 
@@ -85,8 +114,8 @@ ASIRI-2026/
 
 ## المرحلة التالية المقترحة
 
-1. إضافة Market Data Adapter حقيقي مع تأخير واضح ومصدر موثق.
-2. تخزين Paper Trades محليًا ثم في قاعدة مستقلة.
-3. إضافة RSI وEMA وVWAP وATR من بيانات OHLCV.
-4. بناء Backtesting Report لقياس Win Rate وProfit Factor وMax Drawdown.
-5. اعتماد ملاحظات المستخدم على الواجهة المنشورة وتطوير النسخة MVP 0.2.
+1. إضافة مدقق حي مستقل لخدمات API Atlas.
+2. إضافة Market Data Adapter حقيقي مع تأخير واضح ومصدر موثق.
+3. تخزين Paper Trades محليًا ثم في قاعدة مستقلة.
+4. إضافة RSI وEMA وVWAP وATR من بيانات OHLCV.
+5. بناء Backtesting Report لقياس Win Rate وProfit Factor وMax Drawdown.

@@ -1,0 +1,21 @@
+{
+  "name": "API Atlas — Finance Edition",
+  "short_name": "API Atlas",
+  "description": "دليل مستقل للبحث والمقارنة الأولية بين APIs المالية.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06101c",
+  "theme_color": "#07111f",
+  "categories": ["finance", "developer tools", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
