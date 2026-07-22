@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import re
 import threading
 import time
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from .service import audit_symbol
@@ -17,6 +19,12 @@ APP_ROOT = Path(__file__).resolve().parents[1]
 DEMO_FILE = APP_ROOT / "defeatbeta-demo.html"
 SYMBOL_PATTERN = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 CACHE_TTL_SECONDS = 900
+DEFAULT_ALLOWED_ORIGINS = (
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https://raw.githack.com",
+    "https://vip7733661.github.io",
+)
 _CACHE: dict[tuple[str, str | None, str | None, bool], tuple[float, dict[str, Any]]] = {}
 _CACHE_LOCK = threading.Lock()
 
@@ -24,6 +32,19 @@ app = FastAPI(
     title="DefeatBeta Market Data Reliability Lab",
     version="0.2.0",
     description="Standalone market-data quality audit API. No trading or broker connection.",
+)
+
+configured_origins = tuple(
+    origin.strip()
+    for origin in os.getenv("DEFEATBETA_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(configured_origins or DEFAULT_ALLOWED_ORIGINS),
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["Accept", "Content-Type"],
 )
 
 
