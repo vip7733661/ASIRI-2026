@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DefeatBeta Reliability Lab — Preview</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;--bg:#06101d;--panel:#0b1929;--line:#203850;--text:#eef7ff;--muted:#9eb2c5;--cyan:#74e5ff;--green:#67efb0;--amber:#ffc36b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#143553 0,#06101d 38%);color:var(--text);min-height:100vh}main{max-width:1180px;margin:auto;padding:28px 18px 60px}.hero,.panel{border:1px solid var(--line);background:linear-gradient(145deg,rgba(16,37,59,.96),rgba(7,19,33,.98));border-radius:24px}.hero{padding:28px}.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border-radius:999px;background:#123b50;color:var(--cyan);font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green)}h1{font-size:clamp(30px,6vw,58px);margin:18px 0 8px;line-height:1.1}.sub{color:var(--muted);line-height:1.8;max-width:780px}.controls{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}input,button{border-radius:13px;border:1px solid var(--line);padding:13px 15px;font:inherit}input{background:#071321;color:var(--text);min-width:190px;text-transform:uppercase}button{background:linear-gradient(135deg,#1b7792,#14546d);color:white;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.notice{margin-top:14px;color:#ffd9a0;background:#2a2115;border-right:4px solid var(--amber);padding:12px 14px;border-radius:12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin:20px 0}.card{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(8,24,40,.9)}.card span{display:block;color:var(--muted);margin-bottom:8px}.card strong{font-size:27px}.score{color:var(--green)}.panel{padding:22px;margin-top:18px;overflow:auto}h2{margin-top:0}table{width:100%;border-collapse:collapse;min-width:620px}th,td{text-align:right;padding:13px;border-bottom:1px solid #1a3045}th{color:var(--cyan)}.bar{height:9px;background:#162a3e;border-radius:999px;overflow:hidden}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#31b6d6,#67efb0);transition:width .8s ease}.status{color:var(--muted)}footer{color:#7890a6;text-align:center;margin-top:24px;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+<span class="eyebrow"><i class="dot"></i> DefeatBeta Market Data Reliability Lab — MVP 0.1</span>
+<h1>اختبر تقرير جودة البيانات</h1>
+<p class="sub">واجهة تجربة مستقلة لعرض طريقة فحص بيانات OHLCV واحتساب درجة الجودة ومقارنة المصادر. هذه الصفحة لا تتصل بـ Asiri Capital ولا تنفذ تداولًا.</p>
+<div class="controls">
+<input id="symbol" value="AAPL" maxlength="8" aria-label="رمز السهم">
+<button id="run">تشغيل الفحص التجريبي</button>
+</div>
+<div class="notice">هذه معاينة تفاعلية ببيانات نموذجية داخل الصفحة. الجلب الحقيقي من defeatbeta-api يعمل عبر سكربت Python الموجود في المستودع.</div>
+</section>
+<div class="grid">
+<div class="card"><span>السهم</span><strong id="symbolOut">AAPL</strong></div>
+<div class="card"><span>درجة الجودة</span><strong id="score" class="score">—</strong></div>
+<div class="card"><span>عدد الصفوف</span><strong id="rows">—</strong></div>
+<div class="card"><span>آخر تاريخ</span><strong id="last">—</strong></div>
+<div class="card"><span>الحكم</span><strong id="verdict">جاهز</strong></div>
+</div>
+<section class="panel">
+<h2>تقدم الفحص</h2>
+<div class="bar"><i id="progress"></i></div>
+<p id="status" class="status">اضغط تشغيل الفحص التجريبي.</p>
+</section>
+<section class="panel">
+<h2>نتائج الجودة</h2>
+<table>
+<tr><th>المعيار</th><th>النتيجة</th><th>الحالة</th></tr>
+<tr><td>التواريخ المكررة</td><td id="duplicates">—</td><td id="duplicatesState">—</td></tr>
+<tr><td>الخلايا الفارغة</td><td id="nulls">—</td><td id="nullsState">—</td></tr>
+<tr><td>صفوف OHLC غير المنطقية</td><td id="invalid">—</td><td id="invalidState">—</td></tr>
+<tr><td>الفجوات التقريبية</td><td id="gaps">—</td><td id="gapsState">—</td></tr>
+<tr><td>متوسط فرق الإغلاق مقابل المرجع</td><td id="closeDiff">—</td><td id="closeDiffState">—</td></tr>
+</table>
+</section>
+<footer>Static interactive preview • No broker connection • No live orders</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const presets={AAPL:{rows:10418,last:'2026-07-21',duplicates:0,nulls:0,invalid:0,gaps:312,closeDiff:.018,score:97.4},TSLA:{rows:4041,last:'2026-07-21',duplicates:0,nulls:2,invalid:0,gaps:128,closeDiff:.041,score:95.7},AMPL:{rows:1547,last:'2026-07-21',duplicates:0,nulls:0,invalid:0,gaps:61,closeDiff:.083,score:94.2}};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function state(value,good=0,warn=5){return value<=good?'سليم':value<=warn?'مراجعة بسيطة':'يحتاج مراجعة'}
+$('run').addEventListener('click',async()=>{
+ const button=$('run'); const symbol=($('symbol').value||'AAPL').trim().toUpperCase();
+ const data=presets[symbol]||{rows:2180,last:'2026-07-21',duplicates:0,nulls:1,invalid:0,gaps:87,closeDiff:.12,score:92.8};
+ button.disabled=true;$('symbolOut').textContent=symbol;$('score').textContent='—';$('verdict').textContent='جارٍ الفحص';
+ const steps=[['توحيد أعمدة OHLCV...',22],['فحص التكرارات والقيم الفارغة...',46],['قياس الفجوات وحداثة البيانات...',71],['مقارنة سعر الإغلاق مع المصدر المرجعي...',89],['إنشاء النتيجة النهائية...',100]];
+ for(const [text,pct] of steps){$('status').textContent=text;$('progress').style.width=pct+'%';await wait(420)}
+ $('rows').textContent=data.rows.toLocaleString('en-US');$('last').textContent=data.last;$('score').textContent=data.score.toFixed(1)+'/100';
+ $('duplicates').textContent=data.duplicates;$('nulls').textContent=data.nulls;$('invalid').textContent=data.invalid;$('gaps').textContent=data.gaps;$('closeDiff').textContent=data.closeDiff.toFixed(3)+'%';
+ $('duplicatesState').textContent=state(data.duplicates,0,1);$('nullsState').textContent=state(data.nulls,0,3);$('invalidState').textContent=state(data.invalid,0,0);$('gapsState').textContent=data.gaps<80?'مقبول مبدئيًا':'يتطلب رزنامة سوق';$('closeDiffState').textContent=data.closeDiff<=.05?'تطابق ممتاز':data.closeDiff<=.25?'تطابق جيد':'يحتاج مراجعة';
+ $('verdict').textContent=data.score>=95?'جودة ممتازة':data.score>=90?'جودة جيدة':'مراجعة مطلوبة';$('status').textContent='اكتمل الفحص التجريبي بنجاح.';button.disabled=false;
+});
+</script>
+</body>
+</html>
