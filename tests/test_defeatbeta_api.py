@@ -46,6 +46,15 @@ def test_health_endpoint():
     assert response.json()["trading_enabled"] is False
 
 
+def test_health_endpoint_allows_preview_origin():
+    response = client.get(
+        "/api/health",
+        headers={"Origin": "https://raw.githack.com"},
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://raw.githack.com"
+
+
 def test_audit_endpoint_uses_service_and_cache(monkeypatch):
     calls = []
 
