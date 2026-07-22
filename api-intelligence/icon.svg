@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">API Atlas</title>
+  <desc id="desc">أيقونة تطبيق دليل واجهات البيانات المالية</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#173f5c"/>
+      <stop offset="1" stop-color="#07111f"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#32b7d6"/>
+      <stop offset="1" stop-color="#69efb5"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="166" fill="none" stroke="#244d69" stroke-width="14"/>
+  <path d="M122 315 195 250 254 279 335 180 390 215" fill="none" stroke="url(#line)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="195" cy="250" r="18" fill="#70e3ff"/>
+  <circle cx="254" cy="279" r="18" fill="#70e3ff"/>
+  <circle cx="335" cy="180" r="18" fill="#69efb5"/>
+  <path d="M151 372h210" stroke="#9db2c6" stroke-width="16" stroke-linecap="round" opacity=".7"/>
+</svg>
