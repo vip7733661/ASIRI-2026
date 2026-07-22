@@ -5,6 +5,10 @@ on:
     branches:
       - main
     paths:
+      - "index.html"
+      - "signal-lab.html"
+      - "styles.css"
+      - "src/**"
       - "api-intelligence/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -31,10 +35,10 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload API Atlas site
+      - name: Upload complete site tree
         uses: actions/upload-pages-artifact@v4
         with:
-          path: api-intelligence
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
