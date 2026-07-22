@@ -24,6 +24,19 @@
 - Paper Trading Journal داخل الجلسة.
 - اختبارات آلية لمحرك التقييم والمخاطر.
 
+## DefeatBeta Market Data Reliability Lab
+
+أضيف مختبر Python مستقل لفحص بيانات `defeatbeta-api` وقياس جودتها قبل استخدامها في أي تجربة تحليلية.
+
+- يجلب بيانات OHLCV التاريخية دون API key.
+- يوحد الأعمدة والتواريخ ويزيل التكرارات.
+- يكشف الفجوات والقيم الفارغة وصفوف OHLC غير المنطقية.
+- ينتج Data Quality Score من 100.
+- يقارن اختياريًا النتائج مع `yfinance`.
+- يصدر CSV وJSON وتقرير HTML عربي RTL.
+
+[تعليمات تشغيل DefeatBeta Lab](defeatbeta_lab/README.md)
+
 ## التشغيل
 
 لا توجد تبعيات خارجية للواجهة.
@@ -46,6 +59,13 @@ http://localhost:4173
 npm run check
 ```
 
+لاختبارات DefeatBeta Lab:
+
+```bash
+pip install -r defeatbeta_lab/requirements-test.txt
+python -m pytest tests/test_defeatbeta_core.py -q
+```
+
 ## هيكل المشروع
 
 ```text
@@ -53,12 +73,19 @@ ASIRI-2026/
 ├── index.html
 ├── styles.css
 ├── package.json
+├── defeatbeta_lab/
+│   ├── cli.py
+│   ├── core.py
+│   ├── providers.py
+│   ├── report.py
+│   └── README.md
 ├── src/
 │   ├── app.js
 │   ├── demo-data.js
 │   └── scoring-engine.js
 └── tests/
-    └── scoring-engine.test.mjs
+    ├── scoring-engine.test.mjs
+    └── test_defeatbeta_core.py
 ```
 
 ## منطق Asiri Signal Score
@@ -85,8 +112,8 @@ ASIRI-2026/
 
 ## المرحلة التالية المقترحة
 
-1. إضافة Market Data Adapter حقيقي مع تأخير واضح ومصدر موثق.
-2. تخزين Paper Trades محليًا ثم في قاعدة مستقلة.
-3. إضافة RSI وEMA وVWAP وATR من بيانات OHLCV.
-4. بناء Backtesting Report لقياس Win Rate وProfit Factor وMax Drawdown.
-5. اعتماد ملاحظات المستخدم على الواجهة المنشورة وتطوير النسخة MVP 0.2.
+1. تشغيل DefeatBeta Lab على عينة أسهم متنوعة وقياس اكتمال البيانات.
+2. إضافة رزنامة تداول أمريكية دقيقة بدل أيام العمل العامة.
+3. تخزين Paper Trades محليًا ثم في قاعدة مستقلة.
+4. إضافة RSI وEMA وVWAP وATR من بيانات OHLCV.
+5. بناء Backtesting Report لقياس Win Rate وProfit Factor وMax Drawdown.
