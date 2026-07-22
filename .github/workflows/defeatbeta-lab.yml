@@ -47,3 +47,9 @@ jobs:
         run: |
           python -c "from defeatbeta_api.data.ticker import Ticker; from defeatbeta_lab.providers import DefeatBetaProvider, YFinanceProvider; print('runtime imports ok')"
           python -m defeatbeta_lab.cli --help
+      - name: Run live DefeatBeta sample
+        run: |
+          python -m defeatbeta_lab.cli AAPL --start 2026-07-01 --end 2026-07-10 --output-dir /tmp/defeatbeta-smoke
+          test -s /tmp/defeatbeta-smoke/AAPL_defeatbeta.csv
+          test -s /tmp/defeatbeta-smoke/AAPL_metrics.json
+          test -s /tmp/defeatbeta-smoke/AAPL_report.html
