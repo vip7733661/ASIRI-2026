@@ -4,12 +4,16 @@ on:
   push:
     paths:
       - "api-intelligence/**"
+      - "scripts/check-api-health.mjs"
       - "tests/api-intelligence.test.mjs"
+      - "tests/api-health.test.mjs"
       - ".github/workflows/api-intelligence.yml"
   pull_request:
     paths:
       - "api-intelligence/**"
+      - "scripts/check-api-health.mjs"
       - "tests/api-intelligence.test.mjs"
+      - "tests/api-health.test.mjs"
       - ".github/workflows/api-intelligence.yml"
 
 permissions:
@@ -28,8 +32,9 @@ jobs:
           node --check api-intelligence/catalog.js
           node --check api-intelligence/app.js
           node --check api-intelligence/sw.js
-      - name: Run PWA tests
-        run: node --test tests/api-intelligence.test.mjs
+          node --check scripts/check-api-health.mjs
+      - name: Run PWA and health-engine tests
+        run: node --test tests/api-intelligence.test.mjs tests/api-health.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/api-atlas.log 2>&1 &
@@ -40,5 +45,7 @@ jobs:
             sleep 1
           done
           grep -q "API Atlas" /tmp/api-atlas.html
+          grep -q "تحديث الحالة الحية" /tmp/api-atlas.html
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
+          curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/catalog.js | grep -q "public-apis/public-apis"
