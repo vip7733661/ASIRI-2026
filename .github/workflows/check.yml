@@ -1,0 +1,21 @@
+name: Signal Lab Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent/**
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run syntax checks and tests
+        run: npm run check
