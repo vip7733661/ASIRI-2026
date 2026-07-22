@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": null,
+  "sourceSnapshot": "2026-07-13",
+  "methodology": {
+    "scope": "availability-and-latency",
+    "schedule": "every-6-hours",
+    "disclaimer": "لم يكتمل أول فحص حي بعد. الحالة تقيس قابلية الوصول وزمن الاستجابة فقط، ولا تثبت دقة البيانات أو حداثتها أو الحقوق التجارية."
+  },
+  "summary": {
+    "total": 16,
+    "operational": 0,
+    "restricted": 0,
+    "degraded": 0,
+    "unavailable": 0,
+    "operationalRate": 0,
+    "reachabilityRate": 0
+  },
+  "services": {}
+}
