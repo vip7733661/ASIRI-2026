@@ -1,11 +1,11 @@
-const CACHE_NAME = 'api-atlas-live-finance-v2';
+const CACHE_NAME = 'api-atlas-live-finance-v3';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css',
-  './catalog.js',
-  './app.js',
-  './manifest.webmanifest',
+  './styles.css?v=20260722-1',
+  './catalog.js?v=20260722-1',
+  './app.js?v=20260722-1',
+  './manifest.webmanifest?v=20260722-1',
   './icon.svg',
   './live-status.json'
 ];
