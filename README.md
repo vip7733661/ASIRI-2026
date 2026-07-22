@@ -4,6 +4,12 @@
 
 > النسخة الحالية **MVP 0.1** تستخدم بيانات محاكاة فقط. لا تعرض أسعارًا حية، ولا تنفذ أوامر، ولا تمثل توصية استثمارية.
 
+## المعاينة المباشرة
+
+[افتح Asiri Signal Lab — Decision Cockpit](https://cdn.jsdelivr.net/gh/vip7733661/ASIRI-2026@a04a7c2260d7dffd8560c1d24b4f7abbd09d7fad/index.html)
+
+كما أضيف مسار نشر تلقائي عبر GitHub Pages لكل تحديث جديد على فرع `main`.
+
 ## ما الذي يعمل الآن؟
 
 - واجهة عربية RTL احترافية ومتجاوبة.
@@ -83,4 +89,4 @@ ASIRI-2026/
 2. تخزين Paper Trades محليًا ثم في قاعدة مستقلة.
 3. إضافة RSI وEMA وVWAP وATR من بيانات OHLCV.
 4. بناء Backtesting Report لقياس Win Rate وProfit Factor وMax Drawdown.
-5. نشر النسخة التجريبية عبر GitHub Pages أو خدمة مستقلة.
+5. اعتماد ملاحظات المستخدم على الواجهة المنشورة وتطوير النسخة MVP 0.2.
