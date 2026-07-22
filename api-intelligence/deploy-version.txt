@@ -1,0 +1,3 @@
+API Atlas deployment: 2026-07-23-v3
+Root path: /ASIRI-2026/
+App path: /ASIRI-2026/api-intelligence/
