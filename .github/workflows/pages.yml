@@ -1,9 +1,12 @@
-name: Deploy Asiri Signal Lab
+name: Deploy API Atlas
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "api-intelligence/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -22,16 +25,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload API Atlas site
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: api-intelligence
 
       - name: Deploy to GitHub Pages
         id: deployment
