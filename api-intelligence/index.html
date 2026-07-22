@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="API Atlas">
+  <meta name="description" content="دليل مستقل للبحث في APIs المالية المجانية أو ذات الخطة المجانية.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>API Atlas — Finance Edition</title>
+</head>
+<body>
+  <a class="skip-link" href="#catalog">انتقل إلى الدليل</a>
+  <main>
+    <header class="hero">
+      <div class="hero-topline">
+        <span class="eyebrow"><i class="status-dot" id="networkDot"></i><span id="networkLabel">متصل</span></span>
+        <button class="ghost-button" id="installButton" type="button">تثبيت التطبيق</button>
+      </div>
+      <div class="hero-copy">
+        <p class="kicker">API Intelligence Lab</p>
+        <h1>API Atlas <span>Finance Edition</span></h1>
+        <p>تطبيق مستقل للبحث والمقارنة الأولية بين واجهات البيانات المالية المدرجة في مستودع <strong>public-apis</strong>.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="primary-button" id="downloadButton" type="button">تحميل الدليل JSON</button>
+        <button class="secondary-button" id="shareButton" type="button">مشاركة التطبيق</button>
+      </div>
+      <div class="source-note">
+        <strong>تنبيه منهجي:</strong>
+        الإدراج لا يعني أن الخدمة تعمل حاليًا أو أنها مجانية بالكامل أو مناسبة للاستخدام التجاري. جميع الخدمات تحتاج اختبارًا مستقلًا قبل الاعتماد.
+      </div>
+    </header>
+
+    <section class="stats" aria-label="ملخص الدليل">
+      <article><span>الخدمات</span><strong id="totalCount">0</strong></article>
+      <article><span>دون مفتاح</span><strong id="noKeyCount">0</strong></article>
+      <article><span>تدعم HTTPS</span><strong id="httpsCount">0</strong></article>
+      <article><span>المفضلة</span><strong id="favoriteCount">0</strong></article>
+    </section>
+
+    <section class="toolbar" aria-label="أدوات البحث والتصفية">
+      <div class="search-wrap">
+        <label for="searchInput">ابحث بالاسم أو الوصف أو الوسوم</label>
+        <input id="searchInput" type="search" placeholder="مثال: أسهم، SEC، WebSocket..." autocomplete="off">
+      </div>
+      <div class="select-wrap">
+        <label for="typeFilter">نوع الخدمة</label>
+        <select id="typeFilter"><option value="all">جميع الأنواع</option></select>
+      </div>
+      <div class="select-wrap">
+        <label for="sortSelect">الترتيب</label>
+        <select id="sortSelect">
+          <option value="score">الأعلى تقييمًا</option>
+          <option value="name">الاسم</option>
+          <option value="auth">سهولة المصادقة</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="chips" aria-label="فلاتر سريعة">
+      <button class="chip active" data-filter="all" type="button">الكل</button>
+      <button class="chip" data-filter="no-key" type="button">بدون API Key</button>
+      <button class="chip" data-filter="cors" type="button">CORS: Yes</button>
+      <button class="chip" data-filter="market" type="button">بيانات سوق</button>
+      <button class="chip" data-filter="official" type="button">مصادر رسمية</button>
+      <button class="chip" data-filter="favorites" type="button">المفضلة</button>
+    </section>
+
+    <section id="catalog" class="catalog-section">
+      <div class="section-heading">
+        <div>
+          <p class="kicker">Finance Catalog</p>
+          <h2>الخدمات المتاحة</h2>
+        </div>
+        <span id="resultCount" class="result-count">0 نتيجة</span>
+      </div>
+      <div id="emptyState" class="empty-state" hidden>
+        <strong>لا توجد نتائج مطابقة</strong>
+        <p>غيّر كلمات البحث أو أزل بعض الفلاتر.</p>
+      </div>
+      <div id="cards" class="cards" aria-live="polite"></div>
+    </section>
+
+    <section class="methodology">
+      <div>
+        <p class="kicker">Catalog Score</p>
+        <h2>ماذا يعني التقييم؟</h2>
+      </div>
+      <p>التقييم داخل التطبيق يقيس سهولة الاكتشاف والتكامل الأولي فقط: HTTPS، نوع المصادقة، CORS، وجود خطة مجانية ووثائق. لا يقيس دقة البيانات أو سرعة التحديث أو صلاحية الاستخدام التجاري.</p>
+    </section>
+
+    <footer>
+      <span>API Atlas — Finance Edition</span>
+      <span>مصدر البيانات: public-apis/public-apis · MIT</span>
+      <span>لا تداول · لا وساطة · لا توصيات</span>
+    </footer>
+  </main>
+
+  <dialog id="detailsDialog">
+    <form method="dialog" class="dialog-card">
+      <button class="dialog-close" aria-label="إغلاق" value="close">×</button>
+      <div id="dialogContent"></div>
+    </form>
+  </dialog>
+
+  <dialog id="installDialog">
+    <form method="dialog" class="dialog-card install-card">
+      <button class="dialog-close" aria-label="إغلاق" value="close">×</button>
+      <p class="kicker">تثبيت على iPhone</p>
+      <h2>أضف التطبيق إلى الشاشة الرئيسية</h2>
+      <ol>
+        <li>افتح زر المشاركة في Safari.</li>
+        <li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.</li>
+        <li>اضغط <strong>إضافة</strong>.</li>
+      </ol>
+      <p class="muted">على Android سيظهر زر التثبيت تلقائيًا عندما يدعم المتصفح ذلك.</p>
+    </form>
+  </dialog>
+
+  <template id="cardTemplate">
+    <article class="api-card">
+      <div class="card-head">
+        <div>
+          <span class="type-badge"></span>
+          <h3></h3>
+        </div>
+        <button class="favorite-button" type="button" aria-label="إضافة إلى المفضلة">☆</button>
+      </div>
+      <p class="description"></p>
+      <div class="badges"></div>
+      <div class="score-row">
+        <span>Catalog Score</span>
+        <strong class="score-value"></strong>
+      </div>
+      <div class="score-bar"><i></i></div>
+      <div class="card-actions">
+        <button class="details-button" type="button">التفاصيل</button>
+        <a class="docs-link" target="_blank" rel="noopener noreferrer">فتح التوثيق</a>
+      </div>
+    </article>
+  </template>
+
+  <script src="catalog.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
