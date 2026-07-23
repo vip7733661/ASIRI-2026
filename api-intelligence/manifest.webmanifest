@@ -1,7 +1,7 @@
 {
-  "name": "API Atlas — Finance Edition",
-  "short_name": "API Atlas",
-  "description": "دليل مستقل للبحث والمقارنة الأولية بين APIs المالية.",
+  "name": "Asiri Intelligence OS v1",
+  "short_name": "Asiri OS",
+  "description": "غرفة عمليات بحثية للمحفظة وبيانات السوق وجودة مزودي البيانات.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -9,13 +9,6 @@
   "display": "standalone",
   "background_color": "#06101c",
   "theme_color": "#07111f",
-  "categories": ["finance", "developer tools", "productivity"],
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "categories": ["finance", "productivity"],
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
