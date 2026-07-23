@@ -43,8 +43,12 @@ jobs:
           node --check api-intelligence/search-router.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
-      - name: Run PWA and health-engine tests
-        run: node --test tests/api-intelligence.test.mjs tests/api-health.test.mjs tests/market-explorer.test.mjs
+      - name: Test PWA shell and guided ticker routing
+        run: node --test tests/api-intelligence.test.mjs
+      - name: Test provider health engine
+        run: node --test tests/api-health.test.mjs
+      - name: Test market explorer schema
+        run: node --test tests/market-explorer.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/api-atlas.log 2>&1 &
