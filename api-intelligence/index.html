@@ -8,11 +8,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="API Atlas">
   <meta name="description" content="دليل حي لقياس توفر APIs المالية وعرض عينات بيانات سوق حقيقية.">
-  <link rel="manifest" href="manifest.webmanifest?v=20260723-2">
+  <link rel="manifest" href="manifest.webmanifest?v=20260723-3">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=20260723-2">
-  <link rel="stylesheet" href="market-explorer.css?v=20260723-2">
+  <link rel="stylesheet" href="styles.css?v=20260723-3">
+  <link rel="stylesheet" href="market-explorer.css?v=20260723-3">
+  <link rel="stylesheet" href="guided-search.css?v=20260723-3">
   <title>API Atlas — Live Finance Edition</title>
 </head>
 <body>
@@ -42,9 +43,10 @@
       <div class="sessions-wrap"><div class="section-heading compact-heading"><div><p class="kicker">Recent Sessions</p><h3>آخر الجلسات</h3></div><span id="marketRows" class="result-count">—</span></div><div class="table-scroll"><table class="sessions-table"><thead><tr><th>التاريخ</th><th>الافتتاح</th><th>الأعلى</th><th>الأدنى</th><th>الإغلاق</th><th>الحجم</th></tr></thead><tbody id="sessionsBody"><tr><td colspan="6">بانتظار البيانات…</td></tr></tbody></table></div></div>
     </section>
 
-    <section class="toolbar" aria-label="أدوات البحث والتصفية"><div class="search-wrap"><label for="searchInput">ابحث بالاسم أو الوصف أو الوسوم</label><input id="searchInput" type="search" placeholder="مثال: أسهم، SEC، WebSocket..." autocomplete="off"></div><div class="select-wrap"><label for="typeFilter">نوع الخدمة</label><select id="typeFilter"><option value="all">جميع الأنواع</option></select></div><div class="select-wrap"><label for="sortSelect">الترتيب</label><select id="sortSelect"><option value="health">الحالة الحية</option><option value="latency">الأسرع استجابة</option><option value="score">Catalog Score</option><option value="name">الاسم</option><option value="auth">سهولة المصادقة</option></select></div></section>
+    <section class="toolbar" aria-label="أدوات البحث والتصفية"><div class="search-wrap"><label for="searchInput">ابحث عن مزوّد API بالاسم أو الوصف أو الوسوم</label><input id="searchInput" type="search" placeholder="مثال: Alpaca، SEC، WebSocket — وليس رمز سهم" autocomplete="off"><small class="search-help">لرؤية سهم مثل CRDL استخدم مستكشف السوق بالأعلى؛ وإذا كتبته هنا سنوجّهك تلقائيًا.</small></div><div class="select-wrap"><label for="typeFilter">نوع الخدمة</label><select id="typeFilter"><option value="all">جميع الأنواع</option></select></div><div class="select-wrap"><label for="sortSelect">الترتيب</label><select id="sortSelect"><option value="health">الحالة الحية</option><option value="latency">الأسرع استجابة</option><option value="score">Catalog Score</option><option value="name">الاسم</option><option value="auth">سهولة المصادقة</option></select></div></section>
+    <section id="searchIntentPanel" class="search-intent-panel" data-tone="info" hidden aria-live="polite"><p id="searchIntentMessage"></p><button id="searchIntentAction" class="secondary-button" type="button">الانتقال إلى مستكشف الأسهم</button></section>
     <section class="chips" aria-label="فلاتر سريعة"><button class="chip active" data-filter="all" type="button">الكل</button><button class="chip" data-filter="operational" type="button">تعمل الآن</button><button class="chip" data-filter="no-key" type="button">بدون API Key</button><button class="chip" data-filter="cors" type="button">CORS مكتشف</button><button class="chip" data-filter="market" type="button">بيانات سوق</button><button class="chip" data-filter="official" type="button">مصادر رسمية</button><button class="chip" data-filter="favorites" type="button">المفضلة</button></section>
-    <section id="catalog" class="catalog-section"><div class="section-heading"><div><p class="kicker">Live Finance Catalog</p><h2>الخدمات المتاحة</h2></div><span id="resultCount" class="result-count">0 نتيجة</span></div><div id="emptyState" class="empty-state" hidden><strong>لا توجد نتائج مطابقة</strong><p>غيّر كلمات البحث أو أزل بعض الفلاتر.</p></div><div id="cards" class="cards" aria-live="polite"></div></section>
+    <section id="catalog" class="catalog-section"><div class="section-heading"><div><p class="kicker">Live Finance Catalog</p><h2>الخدمات المتاحة</h2></div><span id="resultCount" class="result-count">0 نتيجة</span></div><div id="emptyState" class="empty-state" hidden><strong>لا توجد نتائج مطابقة</strong><p>اكتب اسم مزوّد مثل Alpaca أو Nasdaq، أو استخدم التوجيه إلى مستكشف الأسهم عند إدخال رمز سهم.</p></div><div id="cards" class="cards" aria-live="polite"></div></section>
     <section class="methodology"><div><p class="kicker">Live Verification</p><h2>ماذا تقيس الأرقام؟</h2></div><p>فحص المزودين يقيس HTTP وزمن الاستجابة. مستكشف السوق يجلب ستة أشهر من OHLCV، ينظفها، يحسب RSI وSMA وجودة البيانات، ثم ينشر آخر 30 جلسة. لا يمثل أي منهما توصية شراء أو بيع.</p></section>
     <footer><span>API Atlas — Live Finance Edition</span><span>دليل المزودين: public-apis · بيانات العينة: yfinance/Yahoo Finance</span><span>تحديث آلي · لا تداول · لا توصيات</span></footer>
   </main>
@@ -53,8 +55,9 @@
   <dialog id="installDialog"><form method="dialog" class="dialog-card install-card"><button class="dialog-close" aria-label="إغلاق" value="close">×</button><p class="kicker">تثبيت على iPhone</p><h2>أضف التطبيق إلى الشاشة الرئيسية</h2><ol><li>افتح زر المشاركة في Safari.</li><li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.</li><li>اضغط <strong>إضافة</strong>.</li></ol><p class="muted">على Android سيظهر زر التثبيت تلقائيًا عندما يدعم المتصفح ذلك.</p></form></dialog>
   <template id="cardTemplate"><article class="api-card"><div class="card-head"><div><span class="type-badge"></span><h3></h3></div><button class="favorite-button" type="button" aria-label="إضافة إلى المفضلة">☆</button></div><p class="description"></p><div class="badges"></div><div class="health-row"><span class="health-state"><i></i><strong></strong></span><span class="latency-value">—</span></div><div class="score-row"><span>Catalog Score</span><strong class="score-value"></strong></div><div class="score-bar"><i></i></div><div class="card-actions"><button class="details-button" type="button">التفاصيل</button><a class="docs-link" target="_blank" rel="noopener noreferrer">فتح التوثيق</a></div></article></template>
 
-  <script src="catalog.js?v=20260723-2"></script>
-  <script src="app.js?v=20260723-2"></script>
-  <script src="market-explorer.js?v=20260723-2"></script>
+  <script src="catalog.js?v=20260723-3"></script>
+  <script src="app.js?v=20260723-3"></script>
+  <script src="market-explorer.js?v=20260723-3"></script>
+  <script src="search-router.js?v=20260723-3"></script>
 </body>
 </html>
