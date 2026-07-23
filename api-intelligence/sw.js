@@ -1,11 +1,11 @@
-const CACHE_NAME = 'asiri-intelligence-os-v1.0.1-mobile';
+const CACHE_NAME = 'asiri-intelligence-os-v1.1-golden-alert';
 const APP_SHELL = [
   './', './index.html',
-  './styles.css?v=20260723-4', './market-explorer.css?v=20260723-4',
-  './guided-search.css?v=20260723-4', './asiri-os.css?v=20260723-4',
-  './catalog.js?v=20260723-4', './app.js?v=20260723-4',
-  './market-explorer.js?v=20260723-4', './search-router.js?v=20260723-4',
-  './asiri-os.js?v=20260723-4', './manifest.webmanifest?v=20260723-4',
+  './styles.css?v=20260723-5', './market-explorer.css?v=20260723-5',
+  './guided-search.css?v=20260723-5', './asiri-os.css?v=20260723-5', './golden-alert.css?v=20260723-5',
+  './catalog.js?v=20260723-5', './app.js?v=20260723-5',
+  './market-explorer.js?v=20260723-5', './search-router.js?v=20260723-5',
+  './asiri-os.js?v=20260723-5', './golden-alert.js?v=20260723-5', './manifest.webmanifest?v=20260723-5',
   './icon.svg', './live-status.json', './market-data.json'
 ];
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))); self.skipWaiting(); });
