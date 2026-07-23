@@ -10,6 +10,7 @@ on:
       - "tests/api-intelligence.test.mjs"
       - "tests/api-health.test.mjs"
       - "tests/market-explorer.test.mjs"
+      - "tests/asiri-os.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
   pull_request:
@@ -21,6 +22,7 @@ on:
       - "tests/api-intelligence.test.mjs"
       - "tests/api-health.test.mjs"
       - "tests/market-explorer.test.mjs"
+      - "tests/asiri-os.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
 
@@ -41,6 +43,7 @@ jobs:
           node --check api-intelligence/app.js
           node --check api-intelligence/market-explorer.js
           node --check api-intelligence/search-router.js
+          node --check api-intelligence/asiri-os.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
       - name: Test PWA shell and guided ticker routing
@@ -49,23 +52,24 @@ jobs:
         run: node --test tests/api-health.test.mjs
       - name: Test market explorer schema
         run: node --test tests/market-explorer.test.mjs
+      - name: Test Asiri Intelligence OS v1
+        run: node --test tests/asiri-os.test.mjs
       - name: Smoke-test static server
         run: |
-          python3 -m http.server 4174 --directory api-intelligence >/tmp/api-atlas.log 2>&1 &
+          python3 -m http.server 4174 --directory api-intelligence >/tmp/asiri-os.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID' EXIT
           for i in {1..15}; do
-            if curl -fsS http://127.0.0.1:4174/index.html >/tmp/api-atlas.html; then break; fi
+            if curl -fsS http://127.0.0.1:4174/index.html >/tmp/asiri-os.html; then break; fi
             sleep 1
           done
-          grep -q "API Atlas" /tmp/api-atlas.html
-          grep -q "تجربة بيانات السوق الفعلية" /tmp/api-atlas.html
-          grep -q "وليس رمز سهم" /tmp/api-atlas.html
+          grep -q "Asiri Intelligence OS" /tmp/asiri-os.html
+          grep -q "مركز المحفظة والقرار" /tmp/asiri-os.html
+          grep -q "تحليل بيانات السوق الفعلية" /tmp/asiri-os.html
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/market-data.json | python3 -m json.tool >/dev/null
-          curl -fsS http://127.0.0.1:4174/catalog.js | grep -q "public-apis/public-apis"
-          curl -fsS http://127.0.0.1:4174/search-router.js | grep -q "scrollIntoView"
+          curl -fsS http://127.0.0.1:4174/asiri-os.js | grep -q "Portfolio"
 
   live-probe:
     runs-on: ubuntu-latest
@@ -77,11 +81,7 @@ jobs:
           node-version: "22"
       - name: Execute real provider probes
         run: |
-          node scripts/check-api-health.mjs \
-            --catalog api-intelligence/catalog.js \
-            --output /tmp/live-status.json \
-            --timeout-ms 12000 \
-            --concurrency 4
+          node scripts/check-api-health.mjs --catalog api-intelligence/catalog.js --output /tmp/live-status.json --timeout-ms 12000 --concurrency 4
           cat /tmp/live-status.json
       - name: Upload live result artifact
         uses: actions/upload-artifact@v4
@@ -120,6 +120,6 @@ jobs:
       - name: Upload market data artifact
         uses: actions/upload-artifact@v4
         with:
-          name: api-atlas-market-data
+          name: asiri-os-market-data
           path: /tmp/market-data.json
           retention-days: 3
