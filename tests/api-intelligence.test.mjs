@@ -33,13 +33,13 @@ test('catalog ids are unique and required fields are present', () => {
   }
 });
 
-test('PWA shell references live verification and guided-search assets', () => {
+test('PWA shell references live verification, portfolio, and guided-search assets', () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  for (const asset of ['manifest.webmanifest', 'styles.css', 'catalog.js', 'app.js', 'market-explorer.js', 'guided-search.css', 'search-router.js']) {
+  for (const asset of ['manifest.webmanifest', 'styles.css', 'catalog.js', 'app.js', 'market-explorer.js', 'guided-search.css', 'search-router.js', 'asiri-os.css', 'asiri-os.js']) {
     assert.ok(html.includes(asset), `index is missing ${asset}`);
     assert.ok(fs.existsSync(path.join(root, asset)), `asset is missing: ${asset}`);
   }
-  for (const id of ['refreshStatusButton', 'operationalCount', 'reachabilityRate', 'lastCheckedLabel', 'marketExplorer', 'symbolSelect', 'searchIntentPanel', 'searchIntentAction']) {
+  for (const id of ['refreshStatusButton', 'operationalCount', 'reachabilityRate', 'lastCheckedLabel', 'marketExplorer', 'symbolSelect', 'searchIntentPanel', 'searchIntentAction', 'asiriOS', 'osPositionForm', 'osPortfolioBody', 'osOpportunities']) {
     assert.ok(html.includes(`id="${id}"`), `live UI is missing ${id}`);
   }
   assert.ok(html.includes('وليس رمز سهم'));
@@ -54,6 +54,19 @@ test('ticker router distinguishes stock symbols from API searches', () => {
   assert.ok(router.includes('symbolSelect.dispatchEvent'));
   assert.ok(router.includes('marketExplorer.scrollIntoView'));
   assert.ok(router.includes("event.key === 'Enter'"));
+});
+
+test('portfolio layout is constrained and becomes mobile cards', () => {
+  const css = fs.readFileSync(path.join(root, 'asiri-os.css'), 'utf8');
+  const client = fs.readFileSync(path.join(root, 'asiri-os.js'), 'utf8');
+  assert.ok(css.includes('.os-shell{width:100%;max-width:100%;min-width:0'));
+  assert.ok(css.includes('.os-grid>div,.os-grid>aside'));
+  assert.ok(css.includes('@media(max-width:620px)'));
+  assert.ok(css.includes('.os-table thead{display:none}'));
+  assert.ok(css.includes('content:attr(data-label)'));
+  for (const label of ['السهم', 'الكمية', 'متوسط الشراء', 'السعر الحالي', 'الربح والخسارة', 'القرار والأسباب']) {
+    assert.ok(client.includes(`data-label="${label}"`), `missing mobile label: ${label}`);
+  }
 });
 
 test('live-status is either an honest fallback or a complete verified snapshot', () => {
@@ -93,9 +106,9 @@ test('live-status is either an honest fallback or a complete verified snapshot',
   assert.ok(status.summary.reachabilityRate >= 0 && status.summary.reachabilityRate <= 100);
 });
 
-test('service worker uses network-first for live data and caches guided search', () => {
+test('service worker uses network-first for live data and caches all application modules', () => {
   const serviceWorker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  for (const asset of ['./index.html', './styles.css', './catalog.js', './app.js', './market-explorer.js', './guided-search.css', './search-router.js', './manifest.webmanifest', './live-status.json', './market-data.json']) {
+  for (const asset of ['./index.html', './styles.css', './catalog.js', './app.js', './market-explorer.js', './guided-search.css', './search-router.js', './asiri-os.css', './asiri-os.js', './manifest.webmanifest', './live-status.json', './market-data.json']) {
     assert.ok(serviceWorker.includes(asset), `service worker is missing ${asset}`);
   }
   assert.ok(serviceWorker.includes("endsWith('/live-status.json')"));
