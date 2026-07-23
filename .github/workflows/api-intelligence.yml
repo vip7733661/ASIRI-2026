@@ -12,6 +12,7 @@ on:
       - "tests/market-explorer.test.mjs"
       - "tests/asiri-os.test.mjs"
       - "tests/golden-alert.test.mjs"
+      - "tests/execution-desk.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
   pull_request:
@@ -25,6 +26,7 @@ on:
       - "tests/market-explorer.test.mjs"
       - "tests/asiri-os.test.mjs"
       - "tests/golden-alert.test.mjs"
+      - "tests/execution-desk.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
 
@@ -47,6 +49,7 @@ jobs:
           node --check api-intelligence/search-router.js
           node --check api-intelligence/asiri-os.js
           node --check api-intelligence/golden-alert.js
+          node --check api-intelligence/execution-desk/app.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
       - name: Test PWA shell and guided ticker routing
@@ -59,6 +62,8 @@ jobs:
         run: node --test tests/asiri-os.test.mjs
       - name: Test Golden Alert Engine v1
         run: node --test tests/golden-alert.test.mjs
+      - name: Test Saxo SIM Execution Desk
+        run: node --test tests/execution-desk.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/asiri-os.log 2>&1 &
@@ -77,6 +82,8 @@ jobs:
           curl -fsS http://127.0.0.1:4174/market-data.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/asiri-os.js | grep -q "Portfolio"
           curl -fsS http://127.0.0.1:4174/golden-alert.js | grep -q "Golden Buy Alert"
+          curl -fsS http://127.0.0.1:4174/execution-desk/index.html | grep -q "Asiri Execution Desk"
+          curl -fsS http://127.0.0.1:4174/execution-desk/app.js | grep -q "liveSubmissionAllowed: false"
 
   live-probe:
     runs-on: ubuntu-latest

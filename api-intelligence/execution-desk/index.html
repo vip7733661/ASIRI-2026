@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Asiri Execution Desk — بيئة Saxo SIM التجريبية مع تأكيد يدوي وضوابط مخاطر.">
+  <title>Asiri Execution Desk — Saxo SIM</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=20260723-1">
+</head>
+<body>
+  <main class="desk-shell">
+    <nav class="top-nav" aria-label="التنقل"><a href="../">← العودة إلى Asiri Intelligence OS</a><span id="clock">—</span></nav>
+
+    <header class="hero">
+      <div>
+        <p class="kicker">BROKER EXECUTION LAB</p>
+        <h1>Asiri Execution Desk <span>Saxo SIM</span></h1>
+        <p>غرفة أوامر تجريبية مع تحقق من المخاطر وتأكيد يدوي وسجل تدقيق. لا ترسل هذه الصفحة أي أمر حقيقي إلى Saxo.</p>
+      </div>
+      <div class="status-stack">
+        <span class="badge sim">SIMULATION</span>
+        <span class="badge confirm">MANUAL CONFIRMATION</span>
+        <span class="badge locked">LIVE LOCKED</span>
+      </div>
+    </header>
+
+    <section class="security-banner" role="status">
+      <strong>حاجز أمني مفعل:</strong>
+      لا توجد مفاتيح Saxo أو Access Tokens داخل المتصفح. الإرسال الحقيقي سيُفعّل فقط عبر Backend خاص وOAuth بعد نجاح اختبارات SIM.
+    </section>
+
+    <section class="summary-grid" aria-label="ملخص غرفة التنفيذ">
+      <article><span>حالة Saxo</span><strong id="brokerStatus">غير متصل</strong><small>Backend مطلوب</small></article>
+      <article><span>بيانات السوق</span><strong id="marketStatus">جارٍ التحميل</strong><small id="marketAge">—</small></article>
+      <article><span>الأوامر التجريبية</span><strong id="orderCount">0</strong><small id="filledCount">0 منفذ</small></article>
+      <article><span>الخسارة التجريبية اليومية</span><strong id="dailyLoss">$0.00</strong><small id="dailyLossLimitLabel">الحد: —</small></article>
+    </section>
+
+    <section class="workspace-grid">
+      <div class="main-column">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">ORDER TICKET</p><h2>إنشاء أمر Saxo SIM</h2></div><button id="clearTicket" class="button ghost" type="button">مسح</button></div>
+          <form id="orderForm" novalidate>
+            <div class="form-grid">
+              <label>السهم<select id="symbol" required><option value="">بانتظار السوق…</option></select></label>
+              <label>نوع العملية<select id="side"><option value="Buy">شراء</option><option value="Sell">بيع</option></select></label>
+              <label>نوع الأمر<select id="orderType"><option value="Limit">Limit</option></select></label>
+              <label>المدة<select id="duration"><option value="DayOrder">جلسة اليوم</option><option value="GoodTillCancel">حتى الإلغاء</option></select></label>
+              <label>الكمية<input id="amount" type="number" min="1" step="1" inputmode="decimal" placeholder="مثال: 100" required></label>
+              <label>سعر Limit<input id="limitPrice" type="number" min="0.0001" step="0.0001" inputmode="decimal" required></label>
+              <label>وقف الخسارة / الإلغاء<input id="stopPrice" type="number" min="0.0001" step="0.0001" inputmode="decimal" required></label>
+              <label>الهدف الأول<input id="targetOne" type="number" min="0.0001" step="0.0001" inputmode="decimal" required></label>
+              <label>الهدف الثاني<input id="targetTwo" type="number" min="0.0001" step="0.0001" inputmode="decimal" required></label>
+              <label>سبب التوصية<input id="thesis" type="text" maxlength="180" placeholder="اختراق مؤكد، ارتداد دعم…" required></label>
+            </div>
+
+            <div class="quote-strip">
+              <div><span>آخر سعر منشور</span><strong id="lastPrice">—</strong></div>
+              <div><span>RSI 14</span><strong id="rsi">—</strong></div>
+              <div><span>جودة البيانات</span><strong id="quality">—</strong></div>
+              <div><span>تاريخ الجلسة</span><strong id="marketDate">—</strong></div>
+            </div>
+
+            <div id="validationBox" class="validation-box" data-tone="neutral">
+              أدخل بيانات الأمر ليبدأ فحص المخاطر.
+            </div>
+
+            <div class="ticket-metrics">
+              <article><span>قيمة الأمر</span><strong id="notional">—</strong></article>
+              <article><span>الخسارة القصوى</span><strong id="maxLoss">—</strong></article>
+              <article><span>المخاطرة من المحفظة</span><strong id="riskPercent">—</strong></article>
+              <article><span>العائد/المخاطرة T1</span><strong id="rrOne">—</strong></article>
+              <article><span>العائد/المخاطرة T2</span><strong id="rrTwo">—</strong></article>
+            </div>
+
+            <div class="ticket-actions">
+              <button id="reviewOrder" class="button primary" type="submit">مراجعة الأمر والتأكيد</button>
+              <button class="button disabled" type="button" disabled>إرسال مباشر إلى Saxo — مقفل</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">SIM ORDER QUEUE</p><h2>الأوامر المؤكدة</h2></div><button id="clearOrders" class="button danger-ghost" type="button">مسح السجل التجريبي</button></div>
+          <div id="orders" class="order-list"><div class="empty">لا توجد أوامر مؤكدة بعد.</div></div>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="panel risk-panel">
+          <p class="kicker">RISK GATE</p><h2>ضوابط التنفيذ</h2>
+          <label>قيمة المحفظة التجريبية بالدولار<input id="portfolioValue" type="number" min="100" step="100" value="5000"></label>
+          <label>المخاطرة القصوى للصفقة %<input id="maxRiskPercent" type="number" min="0.1" max="5" step="0.1" value="1"></label>
+          <label>الحد الأعلى لقيمة الأمر<input id="maxOrderValue" type="number" min="100" step="100" value="1500"></label>
+          <label>حد الخسارة اليومية %<input id="dailyLossLimit" type="number" min="0.5" max="10" step="0.5" value="3"></label>
+          <label class="switch-row"><span><strong>Kill Switch</strong><small>يمنع إنشاء أي أمر جديد</small></span><input id="killSwitch" type="checkbox" role="switch"></label>
+          <button id="saveRisk" class="button secondary" type="button">حفظ الضوابط</button>
+        </section>
+
+        <section class="panel connector-panel">
+          <p class="kicker">SAXO CONNECTOR</p><h2>جاهزية الربط</h2>
+          <ul class="checklist">
+            <li class="ok">واجهة SIM مستقلة</li>
+            <li class="ok">تأكيد يدوي قبل الأمر</li>
+            <li class="ok">Request ID لمنع التكرار</li>
+            <li class="ok">Kill Switch وحدود مخاطرة</li>
+            <li class="pending">Backend آمن</li>
+            <li class="pending">OAuth مع Saxo SIM</li>
+            <li class="pending">تحويل Symbol إلى UIC</li>
+            <li class="pending">Pre-check ثم إرسال الأمر</li>
+          </ul>
+          <div class="endpoint"><span>SIM REST</span><code>gateway.saxobank.com/sim/openapi</code></div>
+          <button id="readinessCheck" class="button secondary" type="button">فحص جاهزية المرحلة الحالية</button>
+          <p id="readinessResult" class="muted">—</p>
+        </section>
+
+        <section class="panel audit-panel">
+          <div class="panel-head"><div><p class="kicker">AUDIT LOG</p><h2>سجل التدقيق</h2></div></div>
+          <div id="auditLog" class="audit-list"><div class="empty">لا توجد أحداث.</div></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="confirmDialog">
+    <form method="dialog" class="dialog-card" id="confirmForm">
+      <button class="dialog-close" value="cancel" aria-label="إغلاق">×</button>
+      <p class="kicker">FINAL MANUAL GATE</p>
+      <h2>تأكيد أمر تجريبي</h2>
+      <div id="confirmSummary" class="confirm-summary"></div>
+      <label>اكتب كلمة <strong>تأكيد</strong> للمتابعة<input id="confirmPhrase" autocomplete="off"></label>
+      <div class="dialog-actions"><button value="cancel" class="button ghost">إلغاء</button><button id="confirmSubmit" value="default" class="button primary">تأكيد وإضافة إلى SIM Queue</button></div>
+    </form>
+  </dialog>
+
+  <script src="app.js?v=20260723-1"></script>
+</body>
+</html>
