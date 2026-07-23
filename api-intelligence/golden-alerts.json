@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "rulesVersion": "golden-alert-v1.0",
+  "generatedAt": null,
+  "marketRegime": {
+    "code": "unavailable",
+    "label": "غير متاح",
+    "riskMultiplier": 0,
+    "evidence": []
+  },
+  "summary": {
+    "symbolsEvaluated": 0,
+    "actionable": 0,
+    "goldenBuy": 0,
+    "riskExit": 0,
+    "watch": 0,
+    "blocked": 0
+  },
+  "alerts": [],
+  "methodology": {
+    "minimumDataQuality": 90,
+    "maximumStaleDays": 4,
+    "buyScoreThreshold": 80,
+    "requiredRiskReward": 2,
+    "note": "لم يُنشأ فحص حي بعد. لا توجد توصية أو صفقة آلية."
+  }
+}
