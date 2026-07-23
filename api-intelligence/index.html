@@ -7,15 +7,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="API Atlas">
-  <meta name="description" content="دليل حي لقياس توفر وزمن استجابة APIs المالية.">
-  <link rel="manifest" href="manifest.webmanifest?v=20260722-1">
+  <meta name="description" content="دليل حي لقياس توفر APIs المالية وعرض عينات بيانات سوق حقيقية.">
+  <link rel="manifest" href="manifest.webmanifest?v=20260723-2">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=20260722-1">
+  <link rel="stylesheet" href="styles.css?v=20260723-2">
   <title>API Atlas — Live Finance Edition</title>
 </head>
 <body>
-  <a class="skip-link" href="#catalog">انتقل إلى الدليل</a>
+  <a class="skip-link" href="#marketExplorer">انتقل إلى بيانات السوق</a>
   <main>
     <header class="hero">
       <div class="hero-topline">
@@ -25,10 +25,10 @@
       <div class="hero-copy">
         <p class="kicker">API Intelligence Lab</p>
         <h1>API Atlas <span>Live Finance Edition</span></h1>
-        <p>لوحة حية لفحص توفر وزمن استجابة واجهات البيانات المالية المدرجة في مستودع <strong>public-apis</strong>.</p>
+        <p>لوحة حية لفحص توفر مزودي البيانات المالية، مع مستكشف مستقل يعرض عينات سوق فعلية محدثة آليًا.</p>
       </div>
       <div class="hero-actions">
-        <button class="primary-button" id="refreshStatusButton" type="button">تحديث الحالة الحية</button>
+        <button class="primary-button" id="refreshStatusButton" type="button">تحديث حالة المزودين</button>
         <button class="secondary-button" id="downloadButton" type="button">تحميل التقرير JSON</button>
         <button class="secondary-button" id="shareButton" type="button">مشاركة التطبيق</button>
       </div>
@@ -38,7 +38,7 @@
       </div>
       <div class="source-note">
         <strong>تنبيه منهجي:</strong>
-        الحالة الحية تقيس الوصول وزمن الاستجابة ورمز HTTP فقط. لا تثبت دقة الأسعار أو حداثة بيانات السوق أو ملاءمة الاستخدام التجاري.
+        حالة المزود تقيس الوصول وزمن الاستجابة فقط. أما قسم بيانات السوق فيعرض قيماً فعلية من ملف مستقل، مع وقت المصدر وجودة البيانات.
       </div>
     </header>
 
@@ -49,6 +49,71 @@
       <article><span>مقيدة أو محمية</span><strong id="restrictedCount">—</strong></article>
       <article><span>بدون مفتاح</span><strong id="noKeyCount">0</strong></article>
       <article><span>المفضلة</span><strong id="favoriteCount">0</strong></article>
+    </section>
+
+    <section id="marketExplorer" class="market-explorer" aria-labelledby="marketExplorerTitle">
+      <div class="market-explorer-head">
+        <div>
+          <p class="kicker">Verified Market Snapshot</p>
+          <h2 id="marketExplorerTitle">تجربة بيانات السوق الفعلية</h2>
+          <p>الأسعار والمؤشرات هنا لا تُنشأ داخل المتصفح؛ تُجلب على خادم GitHub وتُنشر فقط بعد نجاح الفحص.</p>
+        </div>
+        <div class="market-controls">
+          <label for="symbolSelect">اختر السهم</label>
+          <select id="symbolSelect"><option value="">بانتظار البيانات…</option></select>
+          <button class="secondary-button" id="refreshMarketDataButton" type="button">تحديث الملف</button>
+        </div>
+      </div>
+
+      <div id="marketDataBanner" class="live-banner market-data-banner" role="status" aria-live="polite">
+        <div><span class="live-pulse"></span><strong id="marketDataState">جارٍ تحميل بيانات السوق…</strong></div>
+        <span id="marketDataUpdated">—</span>
+      </div>
+
+      <div class="market-layout">
+        <article class="quote-panel">
+          <div class="quote-heading">
+            <div>
+              <span class="type-badge" id="marketDataSource">المصدر: —</span>
+              <h3 id="marketSymbol">—</h3>
+              <span id="marketDate" class="muted">—</span>
+            </div>
+            <div class="quote-price">
+              <strong id="marketPrice">—</strong>
+              <span id="marketChange">—</span>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <svg id="marketChart" viewBox="0 0 720 260" role="img" aria-label="رسم أسعار آخر 30 جلسة"></svg>
+            <div id="marketChartEmpty" class="chart-empty">بانتظار بيانات حقيقية للرسم</div>
+          </div>
+          <p id="marketDisclaimer" class="market-disclaimer">لا توجد بيانات منشورة بعد.</p>
+        </article>
+
+        <div class="market-metrics" aria-label="مؤشرات السوق">
+          <article><span>أعلى 20 جلسة</span><strong id="marketHigh20">—</strong></article>
+          <article><span>أدنى 20 جلسة</span><strong id="marketLow20">—</strong></article>
+          <article><span>SMA 20</span><strong id="marketSma20">—</strong></article>
+          <article><span>SMA 50</span><strong id="marketSma50">—</strong></article>
+          <article><span>RSI 14</span><strong id="marketRsi14">—</strong></article>
+          <article><span>حجم آخر جلسة</span><strong id="marketVolume">—</strong></article>
+          <article><span>متوسط حجم 20</span><strong id="marketAvgVolume20">—</strong></article>
+          <article><span>جودة البيانات</span><strong id="marketQuality">—</strong></article>
+        </div>
+      </div>
+
+      <div class="sessions-wrap">
+        <div class="section-heading compact-heading">
+          <div><p class="kicker">Recent Sessions</p><h3>آخر الجلسات</h3></div>
+          <span id="marketRows" class="result-count">—</span>
+        </div>
+        <div class="table-scroll">
+          <table class="sessions-table">
+            <thead><tr><th>التاريخ</th><th>الافتتاح</th><th>الأعلى</th><th>الأدنى</th><th>الإغلاق</th><th>الحجم</th></tr></thead>
+            <tbody id="sessionsBody"><tr><td colspan="6">بانتظار البيانات…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <section class="toolbar" aria-label="أدوات البحث والتصفية">
@@ -84,83 +149,39 @@
 
     <section id="catalog" class="catalog-section">
       <div class="section-heading">
-        <div>
-          <p class="kicker">Live Finance Catalog</p>
-          <h2>الخدمات المتاحة</h2>
-        </div>
+        <div><p class="kicker">Live Finance Catalog</p><h2>الخدمات المتاحة</h2></div>
         <span id="resultCount" class="result-count">0 نتيجة</span>
       </div>
-      <div id="emptyState" class="empty-state" hidden>
-        <strong>لا توجد نتائج مطابقة</strong>
-        <p>غيّر كلمات البحث أو أزل بعض الفلاتر.</p>
-      </div>
+      <div id="emptyState" class="empty-state" hidden><strong>لا توجد نتائج مطابقة</strong><p>غيّر كلمات البحث أو أزل بعض الفلاتر.</p></div>
       <div id="cards" class="cards" aria-live="polite"></div>
     </section>
 
     <section class="methodology">
-      <div>
-        <p class="kicker">Live Verification</p>
-        <h2>ماذا تقيس الأرقام؟</h2>
-      </div>
-      <p>يعمل الفحص من GitHub Actions كل ست ساعات. يقيس استجابة رابط التوثيق الرسمي لكل مزود، ويختبر Endpoint بيانات فعليًا عندما يتوفر مسار آمن بلا مفتاح. حالات 401 و403 و429 تعني أن الخدمة قابلة للوصول لكنها محمية أو محدودة، وليست متوقفة بالضرورة.</p>
+      <div><p class="kicker">Live Verification</p><h2>ماذا تقيس الأرقام؟</h2></div>
+      <p>فحص المزودين يقيس HTTP وزمن الاستجابة. مستكشف السوق يجلب ستة أشهر من OHLCV، ينظفها، يحسب RSI وSMA وجودة البيانات، ثم ينشر آخر 30 جلسة. لا يمثل أي منهما توصية شراء أو بيع.</p>
     </section>
 
     <footer>
       <span>API Atlas — Live Finance Edition</span>
-      <span>مصدر الدليل: public-apis/public-apis · MIT</span>
-      <span>تحديث تلقائي كل 6 ساعات · لا تداول · لا توصيات</span>
+      <span>دليل المزودين: public-apis · بيانات العينة: yfinance/Yahoo Finance</span>
+      <span>تحديث آلي · لا تداول · لا توصيات</span>
     </footer>
   </main>
 
-  <dialog id="detailsDialog">
-    <form method="dialog" class="dialog-card">
-      <button class="dialog-close" aria-label="إغلاق" value="close">×</button>
-      <div id="dialogContent"></div>
-    </form>
-  </dialog>
-
-  <dialog id="installDialog">
-    <form method="dialog" class="dialog-card install-card">
-      <button class="dialog-close" aria-label="إغلاق" value="close">×</button>
-      <p class="kicker">تثبيت على iPhone</p>
-      <h2>أضف التطبيق إلى الشاشة الرئيسية</h2>
-      <ol>
-        <li>افتح زر المشاركة في Safari.</li>
-        <li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.</li>
-        <li>اضغط <strong>إضافة</strong>.</li>
-      </ol>
-      <p class="muted">على Android سيظهر زر التثبيت تلقائيًا عندما يدعم المتصفح ذلك.</p>
-    </form>
-  </dialog>
+  <dialog id="detailsDialog"><form method="dialog" class="dialog-card"><button class="dialog-close" aria-label="إغلاق" value="close">×</button><div id="dialogContent"></div></form></dialog>
+  <dialog id="installDialog"><form method="dialog" class="dialog-card install-card"><button class="dialog-close" aria-label="إغلاق" value="close">×</button><p class="kicker">تثبيت على iPhone</p><h2>أضف التطبيق إلى الشاشة الرئيسية</h2><ol><li>افتح زر المشاركة في Safari.</li><li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.</li><li>اضغط <strong>إضافة</strong>.</li></ol><p class="muted">على Android سيظهر زر التثبيت تلقائيًا عندما يدعم المتصفح ذلك.</p></form></dialog>
 
   <template id="cardTemplate">
     <article class="api-card">
-      <div class="card-head">
-        <div>
-          <span class="type-badge"></span>
-          <h3></h3>
-        </div>
-        <button class="favorite-button" type="button" aria-label="إضافة إلى المفضلة">☆</button>
-      </div>
-      <p class="description"></p>
-      <div class="badges"></div>
-      <div class="health-row">
-        <span class="health-state"><i></i><strong></strong></span>
-        <span class="latency-value">—</span>
-      </div>
-      <div class="score-row">
-        <span>Catalog Score</span>
-        <strong class="score-value"></strong>
-      </div>
-      <div class="score-bar"><i></i></div>
-      <div class="card-actions">
-        <button class="details-button" type="button">التفاصيل</button>
-        <a class="docs-link" target="_blank" rel="noopener noreferrer">فتح التوثيق</a>
-      </div>
+      <div class="card-head"><div><span class="type-badge"></span><h3></h3></div><button class="favorite-button" type="button" aria-label="إضافة إلى المفضلة">☆</button></div>
+      <p class="description"></p><div class="badges"></div>
+      <div class="health-row"><span class="health-state"><i></i><strong></strong></span><span class="latency-value">—</span></div>
+      <div class="score-row"><span>Catalog Score</span><strong class="score-value"></strong></div><div class="score-bar"><i></i></div>
+      <div class="card-actions"><button class="details-button" type="button">التفاصيل</button><a class="docs-link" target="_blank" rel="noopener noreferrer">فتح التوثيق</a></div>
     </article>
   </template>
 
-  <script src="catalog.js?v=20260722-1"></script>
-  <script src="app.js?v=20260722-1"></script>
+  <script src="catalog.js?v=20260723-2"></script>
+  <script src="app.js?v=20260723-2"></script>
 </body>
 </html>
