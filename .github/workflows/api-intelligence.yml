@@ -11,6 +11,7 @@ on:
       - "tests/api-health.test.mjs"
       - "tests/market-explorer.test.mjs"
       - "tests/asiri-os.test.mjs"
+      - "tests/golden-alert.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
   pull_request:
@@ -23,6 +24,7 @@ on:
       - "tests/api-health.test.mjs"
       - "tests/market-explorer.test.mjs"
       - "tests/asiri-os.test.mjs"
+      - "tests/golden-alert.test.mjs"
       - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
 
@@ -44,6 +46,7 @@ jobs:
           node --check api-intelligence/market-explorer.js
           node --check api-intelligence/search-router.js
           node --check api-intelligence/asiri-os.js
+          node --check api-intelligence/golden-alert.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
       - name: Test PWA shell and guided ticker routing
@@ -54,6 +57,8 @@ jobs:
         run: node --test tests/market-explorer.test.mjs
       - name: Test Asiri Intelligence OS v1
         run: node --test tests/asiri-os.test.mjs
+      - name: Test Golden Alert Engine v1
+        run: node --test tests/golden-alert.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/asiri-os.log 2>&1 &
@@ -65,11 +70,13 @@ jobs:
           done
           grep -q "Asiri Intelligence OS" /tmp/asiri-os.html
           grep -q "مركز المحفظة والقرار" /tmp/asiri-os.html
+          grep -q "مركز إشارات البيع والشراء" /tmp/asiri-os.html
           grep -q "تحليل بيانات السوق الفعلية" /tmp/asiri-os.html
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/market-data.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/asiri-os.js | grep -q "Portfolio"
+          curl -fsS http://127.0.0.1:4174/golden-alert.js | grep -q "Golden Buy Alert"
 
   live-probe:
     runs-on: ubuntu-latest
