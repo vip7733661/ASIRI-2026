@@ -63,7 +63,17 @@
     else body.innerHTML=rows.map(r=>{
       const weight=totalValue>0&&finite(r.value)?r.value/totalValue*100:null;
       const concentration=finite(weight)&&weight>35?' · تركّز مرتفع':'';
-      return `<tr><td><strong>${escapeHtml(r.symbol)}</strong></td><td>${number(r.quantity,4)}</td><td>${money(r.avgCost)}</td><td>${money(r.current)}</td><td>${money(r.value)}</td><td class="${(r.pnl||0)>=0?'os-positive':'os-negative'}">${money(r.pnl)}<br><small>${pct(r.pnlPct)}</small></td><td>${finite(weight)?number(weight,1)+'%':'—'}</td><td><span class="os-decision ${r.analysis.decision}">${r.analysis.label}</span><div class="os-reasons">${escapeHtml(r.analysis.reasons.slice(0,2).join(' · ')+concentration)}</div></td><td><button class="os-remove" data-remove="${escapeHtml(r.symbol)}">حذف</button></td></tr>`;
+      return `<tr>
+        <td data-label="السهم"><strong>${escapeHtml(r.symbol)}</strong></td>
+        <td data-label="الكمية">${number(r.quantity,4)}</td>
+        <td data-label="متوسط الشراء">${money(r.avgCost)}</td>
+        <td data-label="السعر الحالي">${money(r.current)}</td>
+        <td data-label="القيمة">${money(r.value)}</td>
+        <td data-label="الربح والخسارة" class="${(r.pnl||0)>=0?'os-positive':'os-negative'}">${money(r.pnl)}<br><small>${pct(r.pnlPct)}</small></td>
+        <td data-label="وزن المركز">${finite(weight)?number(weight,1)+'%':'—'}</td>
+        <td data-label="القرار والأسباب"><span class="os-decision ${r.analysis.decision}">${r.analysis.label}</span><div class="os-reasons">${escapeHtml(r.analysis.reasons.slice(0,2).join(' · ')+concentration)}</div></td>
+        <td data-label="إجراء"><button class="os-remove" data-remove="${escapeHtml(r.symbol)}">حذف</button></td>
+      </tr>`;
     }).join('');
     body.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>{state.positions=state.positions.filter(p=>p.symbol!==btn.dataset.remove);savePositions();render();}));
     renderOpportunities(rows.map(r=>r.symbol));

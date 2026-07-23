@@ -1,4 +1,4 @@
-const CACHE_NAME = 'asiri-intelligence-os-v1';
+const CACHE_NAME = 'asiri-intelligence-os-v1.0.1-mobile';
 const APP_SHELL = [
   './', './index.html',
   './styles.css?v=20260723-4', './market-explorer.css?v=20260723-4',
