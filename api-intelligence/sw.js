@@ -1,13 +1,15 @@
-const CACHE_NAME = 'api-atlas-live-finance-v4';
+const CACHE_NAME = 'api-atlas-live-finance-v5';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=20260723-2',
-  './market-explorer.css?v=20260723-2',
-  './catalog.js?v=20260723-2',
-  './app.js?v=20260723-2',
-  './market-explorer.js?v=20260723-2',
-  './manifest.webmanifest?v=20260723-2',
+  './styles.css?v=20260723-3',
+  './market-explorer.css?v=20260723-3',
+  './guided-search.css?v=20260723-3',
+  './catalog.js?v=20260723-3',
+  './app.js?v=20260723-3',
+  './market-explorer.js?v=20260723-3',
+  './search-router.js?v=20260723-3',
+  './manifest.webmanifest?v=20260723-3',
   './icon.svg',
   './live-status.json',
   './market-data.json'

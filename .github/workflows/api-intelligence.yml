@@ -40,10 +40,15 @@ jobs:
           node --check api-intelligence/catalog.js
           node --check api-intelligence/app.js
           node --check api-intelligence/market-explorer.js
+          node --check api-intelligence/search-router.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
-      - name: Run PWA and health-engine tests
-        run: node --test tests/api-intelligence.test.mjs tests/api-health.test.mjs tests/market-explorer.test.mjs
+      - name: Test PWA shell and guided ticker routing
+        run: node --test tests/api-intelligence.test.mjs
+      - name: Test provider health engine
+        run: node --test tests/api-health.test.mjs
+      - name: Test market explorer schema
+        run: node --test tests/market-explorer.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/api-atlas.log 2>&1 &
@@ -55,10 +60,12 @@ jobs:
           done
           grep -q "API Atlas" /tmp/api-atlas.html
           grep -q "تجربة بيانات السوق الفعلية" /tmp/api-atlas.html
+          grep -q "وليس رمز سهم" /tmp/api-atlas.html
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/market-data.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/catalog.js | grep -q "public-apis/public-apis"
+          curl -fsS http://127.0.0.1:4174/search-router.js | grep -q "scrollIntoView"
 
   live-probe:
     runs-on: ubuntu-latest
