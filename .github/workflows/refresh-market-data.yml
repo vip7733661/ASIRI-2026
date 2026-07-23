@@ -9,7 +9,7 @@ on:
       - "scripts/market-data-requirements.txt"
       - ".github/workflows/refresh-market-data.yml"
   schedule:
-    - cron: "7 */6 * * *"
+    - cron: "9 */6 * * *"
   workflow_dispatch:
 
 permissions:
