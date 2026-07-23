@@ -1,13 +1,16 @@
-const CACHE_NAME = 'api-atlas-live-finance-v3';
+const CACHE_NAME = 'api-atlas-live-finance-v4';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=20260722-1',
-  './catalog.js?v=20260722-1',
-  './app.js?v=20260722-1',
-  './manifest.webmanifest?v=20260722-1',
+  './styles.css?v=20260723-2',
+  './market-explorer.css?v=20260723-2',
+  './catalog.js?v=20260723-2',
+  './app.js?v=20260723-2',
+  './market-explorer.js?v=20260723-2',
+  './manifest.webmanifest?v=20260723-2',
   './icon.svg',
-  './live-status.json'
+  './live-status.json',
+  './market-data.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -51,7 +54,7 @@ async function cacheFirst(request) {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  if (url.pathname.endsWith('/live-status.json')) {
+  if (url.pathname.endsWith('/live-status.json') || url.pathname.endsWith('/market-data.json')) {
     event.respondWith(networkFirst(event.request));
     return;
   }

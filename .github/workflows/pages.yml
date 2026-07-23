@@ -7,6 +7,8 @@ on:
     paths:
       - "api-intelligence/**"
       - "scripts/check-api-health.mjs"
+      - "scripts/generate_market_data.py"
+      - "scripts/market-data-requirements.txt"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 */6 * * *"
@@ -27,7 +29,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,6 +38,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scripts/market-data-requirements.txt
 
       - name: Run live API availability checks
         run: |
@@ -46,6 +55,18 @@ jobs:
             --concurrency 4
           node -e "const x=require('./api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1); console.log(x.generatedAt, x.summary)"
 
+      - name: Generate verified market data
+        run: |
+          python -m pip install -r scripts/market-data-requirements.txt
+          python scripts/generate_market_data.py --output api-intelligence/market-data.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('api-intelligence/market-data.json'))
+          if not payload.get('generatedAt') or len(payload.get('symbols', {})) < 5:
+              raise SystemExit('market data payload is incomplete')
+          print(payload['generatedAt'], list(payload['symbols']), payload['errors'])
+          PY
+
       - name: Prepare API Atlas as site root
         run: |
           rm -rf _site
@@ -53,6 +74,9 @@ jobs:
           cp -R api-intelligence/. _site/
           test -s _site/index.html
           test -s _site/live-status.json
+          test -s _site/market-data.json
+          test -s _site/market-explorer.js
+          grep -q "تجربة بيانات السوق الفعلية" _site/index.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

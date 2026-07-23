@@ -5,15 +5,23 @@ on:
     paths:
       - "api-intelligence/**"
       - "scripts/check-api-health.mjs"
+      - "scripts/generate_market_data.py"
+      - "scripts/market-data-requirements.txt"
       - "tests/api-intelligence.test.mjs"
       - "tests/api-health.test.mjs"
+      - "tests/market-explorer.test.mjs"
+      - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
   pull_request:
     paths:
       - "api-intelligence/**"
       - "scripts/check-api-health.mjs"
+      - "scripts/generate_market_data.py"
+      - "scripts/market-data-requirements.txt"
       - "tests/api-intelligence.test.mjs"
       - "tests/api-health.test.mjs"
+      - "tests/market-explorer.test.mjs"
+      - "tests/test_market_data.py"
       - ".github/workflows/api-intelligence.yml"
 
 permissions:
@@ -31,10 +39,11 @@ jobs:
         run: |
           node --check api-intelligence/catalog.js
           node --check api-intelligence/app.js
+          node --check api-intelligence/market-explorer.js
           node --check api-intelligence/sw.js
           node --check scripts/check-api-health.mjs
       - name: Run PWA and health-engine tests
-        run: node --test tests/api-intelligence.test.mjs tests/api-health.test.mjs
+        run: node --test tests/api-intelligence.test.mjs tests/api-health.test.mjs tests/market-explorer.test.mjs
       - name: Smoke-test static server
         run: |
           python3 -m http.server 4174 --directory api-intelligence >/tmp/api-atlas.log 2>&1 &
@@ -45,9 +54,10 @@ jobs:
             sleep 1
           done
           grep -q "API Atlas" /tmp/api-atlas.html
-          grep -q "تحديث الحالة الحية" /tmp/api-atlas.html
+          grep -q "تجربة بيانات السوق الفعلية" /tmp/api-atlas.html
           curl -fsS http://127.0.0.1:4174/manifest.webmanifest | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/live-status.json | python3 -m json.tool >/dev/null
+          curl -fsS http://127.0.0.1:4174/market-data.json | python3 -m json.tool >/dev/null
           curl -fsS http://127.0.0.1:4174/catalog.js | grep -q "public-apis/public-apis"
 
   live-probe:
@@ -71,4 +81,38 @@ jobs:
         with:
           name: api-atlas-live-status
           path: /tmp/live-status.json
+          retention-days: 3
+
+  market-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scripts/market-data-requirements.txt
+      - name: Install market data dependencies
+        run: python -m pip install -r scripts/market-data-requirements.txt
+      - name: Run calculation tests
+        run: python -m unittest tests/test_market_data.py -v
+      - name: Generate real market snapshot
+        run: |
+          python scripts/generate_market_data.py --output /tmp/market-data.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/market-data.json'))
+          assert payload['generatedAt']
+          assert len(payload['symbols']) >= 5
+          for symbol, data in payload['symbols'].items():
+              assert data['latestClose'] > 0
+              assert len(data['sessions']) >= 20
+          print(payload['generatedAt'], list(payload['symbols']), payload['errors'])
+          PY
+      - name: Upload market data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-atlas-market-data
+          path: /tmp/market-data.json
           retention-days: 3
