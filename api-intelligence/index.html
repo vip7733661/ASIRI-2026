@@ -8,13 +8,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Asiri Intelligence OS">
   <meta name="description" content="غرفة عمليات بحثية للمحفظة وبيانات السوق ومزودي البيانات المالية.">
-  <link rel="manifest" href="manifest.webmanifest?v=20260723-4">
+  <link rel="manifest" href="manifest.webmanifest?v=20260723-5">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=20260723-4">
-  <link rel="stylesheet" href="market-explorer.css?v=20260723-4">
-  <link rel="stylesheet" href="guided-search.css?v=20260723-4">
-  <link rel="stylesheet" href="asiri-os.css?v=20260723-4">
+  <link rel="stylesheet" href="styles.css?v=20260723-5">
+  <link rel="stylesheet" href="market-explorer.css?v=20260723-5">
+  <link rel="stylesheet" href="guided-search.css?v=20260723-5">
+  <link rel="stylesheet" href="asiri-os.css?v=20260723-5">
+  <link rel="stylesheet" href="golden-alert.css?v=20260723-5">
   <title>Asiri Intelligence OS v1</title>
 </head>
 <body>
@@ -29,6 +30,13 @@
     </header>
 
     <section class="stats" aria-label="ملخص الحالة الحية"><article><span>الخدمات</span><strong id="totalCount">0</strong></article><article><span>تعمل الآن</span><strong id="operationalCount">—</strong></article><article><span>قابلة للوصول</span><strong id="reachabilityRate">—</strong></article><article><span>مقيدة أو محمية</span><strong id="restrictedCount">—</strong></article><article><span>بدون مفتاح</span><strong id="noKeyCount">0</strong></article><article><span>المفضلة</span><strong id="favoriteCount">0</strong></article></section>
+
+    <section id="goldenAlerts" class="golden-alert-shell" aria-labelledby="goldenAlertTitle">
+      <div class="golden-alert-head"><div><p class="kicker">Golden Alert Engine v1</p><h2 id="goldenAlertTitle">مركز إشارات البيع والشراء</h2><p>لا تظهر إشارة الشراء إلا عند اكتمال الاتجاه والزخم والحجم وجودة البيانات ودعم السوق. إشارات المحفظة تُفصل عن الفرص الجديدة.</p></div><div class="alert-controls"><button id="enableAlerts" class="primary-button" type="button">تفعيل إشعارات المتصفح</button><button id="refreshAlerts" class="secondary-button" type="button">إعادة فحص الإشارات</button></div></div>
+      <div class="alert-summary"><article><span>حالة البيانات</span><strong id="alertFreshness">—</strong></article><article><span>Golden Buy</span><strong id="alertBuyCount">0</strong></article><article><span>خروج أو تخفيف</span><strong id="alertRiskCount">0</strong></article><article><span>حالة السوق</span><strong id="alertMarket">—</strong></article></div>
+      <p class="muted">آخر Snapshot: <span id="alertUpdated">—</span></p>
+      <div class="alert-grid"><section class="alert-panel"><h3>فرص شراء مكتملة الشروط</h3><div id="goldenBuyList" class="alert-list"><div class="alert-empty">جارٍ تشغيل المحرك…</div></div></section><section class="alert-panel"><h3>تنبيهات المحفظة الدفاعية</h3><div id="portfolioAlertList" class="alert-list"><div class="alert-empty">جارٍ فحص المراكز…</div></div></section></div>
+    </section>
 
     <section id="asiriOS" class="os-shell" aria-labelledby="osTitle">
       <div class="os-head"><div><p class="kicker">Portfolio Decision Center</p><h2 id="osTitle">مركز المحفظة والقرار</h2><p class="os-head-desc">القيمة والربح والخسارة تُحسب من بيانات السوق المنشورة.<br>المحفظة تُحفظ محليًا على جهازك.</p></div><div class="os-head-status"><span class="os-badge">Read Only</span><p id="osDataState" class="muted os-data-state">جارٍ تحميل بيانات السوق…</p></div></div>
@@ -56,10 +64,11 @@
   <dialog id="installDialog"><form method="dialog" class="dialog-card install-card"><button class="dialog-close" aria-label="إغلاق" value="close">×</button><p class="kicker">تثبيت على iPhone</p><h2>أضف التطبيق إلى الشاشة الرئيسية</h2><ol><li>افتح زر المشاركة في Safari.</li><li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.</li><li>اضغط <strong>إضافة</strong>.</li></ol></form></dialog>
   <template id="cardTemplate"><article class="api-card"><div class="card-head"><div><span class="type-badge"></span><h3></h3></div><button class="favorite-button" type="button" aria-label="إضافة إلى المفضلة">☆</button></div><p class="description"></p><div class="badges"></div><div class="health-row"><span class="health-state"><i></i><strong></strong></span><span class="latency-value">—</span></div><div class="score-row"><span>Catalog Score</span><strong class="score-value"></strong></div><div class="score-bar"><i></i></div><div class="card-actions"><button class="details-button" type="button">التفاصيل</button><a class="docs-link" target="_blank" rel="noopener noreferrer">فتح التوثيق</a></div></article></template>
 
-  <script src="catalog.js?v=20260723-4"></script>
-  <script src="app.js?v=20260723-4"></script>
-  <script src="market-explorer.js?v=20260723-4"></script>
-  <script src="search-router.js?v=20260723-4"></script>
-  <script src="asiri-os.js?v=20260723-4"></script>
+  <script src="catalog.js?v=20260723-5"></script>
+  <script src="app.js?v=20260723-5"></script>
+  <script src="market-explorer.js?v=20260723-5"></script>
+  <script src="search-router.js?v=20260723-5"></script>
+  <script src="asiri-os.js?v=20260723-5"></script>
+  <script src="golden-alert.js?v=20260723-5"></script>
 </body>
 </html>
