@@ -5,10 +5,6 @@ on:
     branches:
       - main
     paths:
-      - "index.html"
-      - "signal-lab.html"
-      - "styles.css"
-      - "src/**"
       - "api-intelligence/**"
       - "scripts/check-api-health.mjs"
       - ".github/workflows/pages.yml"
@@ -17,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -35,8 +31,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -50,37 +44,20 @@ jobs:
             --output api-intelligence/live-status.json \
             --timeout-ms 12000 \
             --concurrency 4
-          node -e "const x=require('./api-intelligence/live-status.json'); console.log(x.summary)"
+          node -e "const x=require('./api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1); console.log(x.generatedAt, x.summary)"
 
-      - name: Persist latest live results when permitted
-        continue-on-error: true
+      - name: Prepare API Atlas as site root
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add api-intelligence/live-status.json
-          if git diff --cached --quiet; then
-            echo "No live-status changes to commit."
-          else
-            git commit -m "Update live API health [skip ci]"
-            git push origin HEAD:main
-          fi
+          rm -rf _site
+          mkdir -p _site
+          cp -R api-intelligence/. _site/
+          test -s _site/index.html
+          test -s _site/live-status.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare static site
-        run: |
-          rm -rf _site
-          mkdir -p _site
-          cp index.html signal-lab.html styles.css _site/
-          cp -R src api-intelligence _site/
-
-      - name: Verify generated live payload
-        run: |
-          test -s _site/api-intelligence/live-status.json
-          node -e "const x=require('./_site/api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1); console.log(x.generatedAt, x.summary)"
-
-      - name: Upload complete site tree
+      - name: Upload API Atlas site
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
