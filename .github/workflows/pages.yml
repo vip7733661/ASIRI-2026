@@ -1,9 +1,8 @@
-name: Deploy API Atlas Live
+name: Deploy Asiri Intelligence OS v1
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "api-intelligence/**"
       - "scripts/check-api-health.mjs"
@@ -33,41 +32,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: scripts/market-data-requirements.txt
-
       - name: Run live API availability checks
         run: |
-          node scripts/check-api-health.mjs \
-            --catalog api-intelligence/catalog.js \
-            --output api-intelligence/live-status.json \
-            --timeout-ms 12000 \
-            --concurrency 4
-          node -e "const x=require('./api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1); console.log(x.generatedAt, x.summary)"
-
+          node scripts/check-api-health.mjs --catalog api-intelligence/catalog.js --output api-intelligence/live-status.json --timeout-ms 12000 --concurrency 4
+          node -e "const x=require('./api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total < 1) process.exit(1)"
       - name: Generate verified market data
         run: |
           python -m pip install -r scripts/market-data-requirements.txt
           python scripts/generate_market_data.py --output api-intelligence/market-data.json
           python - <<'PY'
           import json
-          payload = json.load(open('api-intelligence/market-data.json'))
-          if not payload.get('generatedAt') or len(payload.get('symbols', {})) < 5:
+          payload=json.load(open('api-intelligence/market-data.json'))
+          if not payload.get('generatedAt') or len(payload.get('symbols',{}))<5:
               raise SystemExit('market data payload is incomplete')
-          print(payload['generatedAt'], list(payload['symbols']), payload['errors'])
+          print(payload['generatedAt'],list(payload['symbols']),payload['errors'])
           PY
-
-      - name: Prepare API Atlas as site root
+      - name: Prepare Asiri Intelligence OS site
         run: |
           rm -rf _site
           mkdir -p _site
@@ -75,17 +65,16 @@ jobs:
           test -s _site/index.html
           test -s _site/live-status.json
           test -s _site/market-data.json
-          test -s _site/market-explorer.js
-          grep -q "تجربة بيانات السوق الفعلية" _site/index.html
-
+          test -s _site/asiri-os.js
+          test -s _site/asiri-os.css
+          grep -q "Asiri Intelligence OS" _site/index.html
+          grep -q "مركز المحفظة والقرار" _site/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
-      - name: Upload API Atlas site
+      - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
