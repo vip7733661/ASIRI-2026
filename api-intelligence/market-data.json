@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": null,
+  "source": {
+    "name": "yfinance",
+    "version": null,
+    "usage": "research-and-educational"
+  },
+  "symbols": {},
+  "errors": {},
+  "disclaimer": "لم يكتمل أول تحديث لبيانات السوق بعد. لا تظهر الصفحة أي أسعار حتى تنجح عملية جلب حقيقية."
+}
