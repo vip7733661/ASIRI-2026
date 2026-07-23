@@ -1,0 +1,49 @@
+name: Refresh API Atlas Live Status
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: api-atlas-live-status
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Probe providers
+        run: |
+          node scripts/check-api-health.mjs \
+            --catalog api-intelligence/catalog.js \
+            --output api-intelligence/live-status.json \
+            --timeout-ms 12000 \
+            --concurrency 4
+          node -e "const x=require('./api-intelligence/live-status.json'); if (!x.generatedAt || x.summary.total !== 16) process.exit(1); console.log(x.generatedAt, x.summary)"
+
+      - name: Commit verified status
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api-intelligence/live-status.json
+          if git diff --cached --quiet; then
+            echo "No status changes."
+          else
+            git commit -m "Refresh API Atlas live status [skip ci]"
+            git push origin HEAD:main
+          fi
