@@ -1,0 +1,71 @@
+name: Refresh Market Data
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/generate_market_data.py"
+      - "scripts/market-data-requirements.txt"
+      - ".github/workflows/refresh-market-data.yml"
+  schedule:
+    - cron: "7 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: api-atlas-market-data
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scripts/market-data-requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r scripts/market-data-requirements.txt
+
+      - name: Test calculations
+        run: python -m unittest tests/test_market_data.py -v
+
+      - name: Generate verified snapshot
+        run: |
+          python scripts/generate_market_data.py --output api-intelligence/market-data.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('api-intelligence/market-data.json'))
+          if not payload.get('generatedAt'):
+              raise SystemExit('generatedAt is missing')
+          if len(payload.get('symbols', {})) < 5:
+              raise SystemExit(f"insufficient symbols: {payload.get('errors', {})}")
+          for symbol, data in payload['symbols'].items():
+              if not data.get('latestClose') or len(data.get('sessions', [])) < 20:
+                  raise SystemExit(f'invalid snapshot for {symbol}')
+          print(payload['generatedAt'], list(payload['symbols']), payload['errors'])
+          PY
+
+      - name: Commit latest verified data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api-intelligence/market-data.json
+          if git diff --cached --quiet; then
+            echo "No market data changes."
+          else
+            git commit -m "Refresh verified market data"
+            git push origin HEAD:main
+          fi
