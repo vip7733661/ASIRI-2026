@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07110a">
+  <title>Asiri Music Professional</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div><span class="eyebrow">PROFESSIONAL PREVIEW</span><h1>Asiri Music</h1></div>
+      <button id="loginButton">الدخول عبر Spotify</button>
+    </header>
+
+    <section id="healthCard" class="card health-card">
+      <div><span class="eyebrow">System Health</span><h2>حالة النظام</h2></div>
+      <strong id="healthStatus">جارٍ الفحص…</strong>
+    </section>
+
+    <section id="profileCard" class="card hidden"><strong id="profileName"></strong><span id="profilePlan"></span></section>
+
+    <section class="card hero">
+      <div><span class="eyebrow">Spotify Engine</span><h2>بحث وتشغيل بمعمارية مستقرة</h2><p>كل وحدة معزولة؛ فشل أي ميزة لا يوقف التطبيق.</p></div>
+      <form id="searchForm"><input id="searchInput" placeholder="محمد عبده - الأماكن"><button>بحث</button></form>
+      <p id="statusText">سجّل الدخول للبدء.</p>
+    </section>
+
+    <section><div class="section-head"><h2>النتائج</h2><span id="resultCount"></span></div><div id="results" class="grid"></div></section>
+  </main>
+
+  <aside id="playerBar" class="player hidden"><img id="playerCover" alt=""><div><strong id="playerTitle">اختر أغنية</strong><span id="playerArtist"></span></div><button id="prevButton">⏮</button><button id="playButton">▶</button><button id="nextButton">⏭</button></aside>
+
+  <template id="trackTemplate"><article class="track"><img class="cover" alt=""><div><strong class="name"></strong><span class="artist"></span><small class="album"></small></div><button class="play">▶ تشغيل</button><a class="open" target="_blank" rel="noopener">Spotify</a></article></template>
+
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
