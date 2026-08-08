@@ -1,5 +1,6 @@
 const CLIENT_ID='3ac122f971744e508bfd33ad0637d421';
 const SCOPES=['user-read-private','user-read-email','streaming','user-read-playback-state','user-modify-playback-state','user-library-read','user-library-modify','playlist-read-private','playlist-modify-private','playlist-modify-public'];
+const PLAYBACK_SCOPES=['streaming','user-read-playback-state','user-modify-playback-state'];
 const NS='asiri-music-pro.v1.';
 const $=selector=>document.querySelector(selector);
 const get=key=>{try{return JSON.parse(localStorage.getItem(NS+key)||'null')?.value??null}catch{return null}};
@@ -8,6 +9,7 @@ const remove=key=>localStorage.removeItem(NS+key);
 let currentQueue=[];
 let currentIndex=-1;
 let playbackEngine=null;
+let pendingPlaybackRequest=null;
 
 function base64url(input){return btoa(String.fromCharCode(...new Uint8Array(input))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_')}
 async function sha256(text){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))}
@@ -30,6 +32,7 @@ async function refresh(){
   set('spotify.accessToken',payload.access_token);
   set('spotify.expiresAt',Date.now()+payload.expires_in*1000-60000);
   if(payload.refresh_token)set('spotify.refreshToken',payload.refresh_token);
+  if(payload.scope)set('spotify.scope',payload.scope);
   return payload.access_token;
 }
 
@@ -60,6 +63,60 @@ function health(ok,text){
   if($('#healthStatus'))$('#healthStatus').textContent=text;
 }
 function status(text){if($('#statusText'))$('#statusText').textContent=text}
+
+function grantedSpotifyScopes(){
+  const raw=String(get('spotify.scope')||'').trim();
+  return raw?new Set(raw.split(/\s+/).filter(Boolean)):null;
+}
+
+function missingPlaybackScopes(){
+  const granted=grantedSpotifyScopes();
+  return granted?PLAYBACK_SCOPES.filter(scope=>!granted.has(scope)):[];
+}
+
+function playbackAuthorizationError(){
+  const error=new Error('صلاحية الصوت في جلسة Spotify الحالية غير مكتملة. فعّل الصوت مرة واحدة ثم جرّب الأغنية من جديد.');
+  error.code='PLAYBACK_AUTH_REQUIRED';
+  error.status=403;
+  return error;
+}
+
+function requireKnownPlaybackScopes(){
+  if(missingPlaybackScopes().length)throw playbackAuthorizationError();
+}
+
+function showPlaybackRecovery(message,{reauth=false}={}){
+  const notice=$('#playbackRecovery');
+  const text=$('#playbackRecoveryText');
+  const button=$('#playbackRecoveryButton');
+  if(text)text.textContent=message;
+  if(button){
+    button.dataset.action=reauth?'reauth':'retry';
+    button.textContent=reauth?'تفعيل الصوت عبر Spotify':'🔊 تفعيل الصوت وتشغيل الأغنية';
+  }
+  notice?.classList.remove('hidden');
+}
+
+function hidePlaybackRecovery(){
+  $('#playbackRecovery')?.classList.add('hidden');
+}
+
+function handlePlaybackFailure(error){
+  const granted=grantedSpotifyScopes();
+  const missing=missingPlaybackScopes();
+  const authRequired=error?.code==='PLAYBACK_AUTH_REQUIRED'||error?.message==='AUTH_REQUIRED'||(Number(error?.status)===403&&(!granted||missing.length));
+  if(authRequired){
+    showPlaybackRecovery('Spotify متصل للبحث، لكن جلسة الحساب الحالية لا تملك صلاحيات الصوت المطلوبة داخل Asiri. التفعيل مرة واحدة يحفظ الصلاحيات الجديدة.',{reauth:true});
+    const button=$('#loginButton');
+    if(button){button.classList.remove('hidden');button.textContent='تفعيل الصوت عبر Spotify'}
+    return;
+  }
+  if(error?.code==='AUTOPLAY_BLOCKED'){
+    showPlaybackRecovery('iPhone منع بدء الصوت تلقائيًا. اضغط الزر الأخضر مرة واحدة وسأشغّل نفس الأغنية فورًا.');
+    return;
+  }
+  showPlaybackRecovery(error?.message?`تعذر بدء الصوت: ${error.message}`:'تعذر بدء الصوت الآن. اضغط لإعادة المحاولة.');
+}
 
 function setQueue(tracks,{startIndex=0,source='web'}={}){
   currentQueue=[...new Map((tracks||[]).filter(track=>track?.id).map(track=>[track.id,track])).values()];
@@ -93,6 +150,12 @@ function ensurePlaybackEngine(){
     currentIndex=Number(event.detail?.index??currentIndex);
     showPlayerTrack(event.detail?.track,false);
   });
+  playbackEngine.addEventListener('autoplay-failed',event=>{
+    showPlaybackRecovery(event.detail?.message||'iPhone منع بدء الصوت تلقائيًا. اضغط لتفعيل الصوت وتشغيل الأغنية.');
+  });
+  playbackEngine.addEventListener('playback-error',event=>{
+    showPlaybackRecovery(event.detail?.message||'تعذر تشغيل Spotify داخل Asiri.');
+  });
   return playbackEngine;
 }
 
@@ -117,16 +180,31 @@ function updatePlayerBar(detail={}){
 }
 
 async function activateFromGesture(){
-  return ensurePlaybackEngine().activateFromGesture();
+  try{
+    requireKnownPlaybackScopes();
+    return ensurePlaybackEngine().activateFromGesture();
+  }catch(error){
+    handlePlaybackFailure(error);
+    throw error;
+  }
 }
 
 async function playQueue(tracks,{startIndex=0,source='web',userGesture=false,positionMs=0}={}){
   const queue=setQueue(tracks,{startIndex,source});
   if(!queue.length)throw new Error('لا توجد أغنيات صالحة للتشغيل.');
-  const engine=ensurePlaybackEngine();
-  if(userGesture)await engine.activateFromGesture();
-  await engine.playQueue(queue,{startIndex:currentIndex,source,userGesture:false,positionMs});
-  return queue;
+  pendingPlaybackRequest={tracks:[...queue],startIndex:currentIndex,source,positionMs};
+  try{
+    requireKnownPlaybackScopes();
+    const engine=ensurePlaybackEngine();
+    if(userGesture)await engine.activateFromGesture();
+    await engine.playQueue(queue,{startIndex:currentIndex,source,userGesture:false,positionMs});
+    pendingPlaybackRequest=null;
+    hidePlaybackRecovery();
+    return queue;
+  }catch(error){
+    handlePlaybackFailure(error);
+    throw error;
+  }
 }
 
 function render(track,index,queue){
@@ -160,15 +238,21 @@ async function load(){
     if($('#profileName'))$('#profileName').textContent=me.display_name||me.id;
     if($('#profilePlan'))$('#profilePlan').textContent='Spotify متصل';
     $('#profileCard')?.classList.remove('hidden');
+    if(missingPlaybackScopes().length){
+      const button=$('#loginButton');
+      if(button){button.classList.remove('hidden');button.textContent='تفعيل الصوت عبر Spotify'}
+      health(false,'Spotify متصل — يلزم تفعيل صلاحيات الصوت');
+      showPlaybackRecovery('البحث يعمل، لكن جلسة Spotify المحفوظة لا تحتوي جميع صلاحيات Web Playback. فعّل الصوت مرة واحدة فقط.',{reauth:true});
+      return;
+    }
     $('#loginButton')?.classList.add('hidden');
     status('اختر أغنية واستمع إليها داخل Asiri Music.');
     try{await ensurePlaybackEngine().connect();health(true,'Spotify Player جاهز — الاستماع داخل Asiri Music')}
     catch(error){
       console.error(error);
       health(false,error.message||'تعذر تجهيز المشغل الداخلي');
-      status('تعذر تشغيل Web Playback الآن. صلاحياتك الحالية محفوظة؛ أعد الربط فقط إذا طلب Spotify ذلك.');
-      const button=$('#loginButton');
-      if(button){button.classList.remove('hidden');button.textContent='إعادة ربط Spotify'}
+      handlePlaybackFailure(error);
+      status('تعذر تجهيز Web Playback الآن. اتبع رسالة الصوت الظاهرة ثم أعد المحاولة.');
     }
   }catch(error){
     console.error(error);
@@ -179,6 +263,24 @@ async function load(){
 }
 
 $('#loginButton')?.addEventListener('click',login);
+$('#playbackRecoveryButton')?.addEventListener('click',async event=>{
+  if(event.currentTarget?.dataset?.action==='reauth')return login();
+  try{
+    requireKnownPlaybackScopes();
+    const engine=ensurePlaybackEngine();
+    const activation=engine.activateFromGesture();
+    await activation;
+    const request=pendingPlaybackRequest;
+    if(request){
+      await playQueue(request.tracks,{startIndex:request.startIndex,source:request.source,userGesture:false,positionMs:request.positionMs});
+    }else{
+      await engine.toggle();
+      hidePlaybackRecovery();
+    }
+  }catch(error){
+    handlePlaybackFailure(error);
+  }
+});
 $('#searchForm')?.addEventListener('submit',async event=>{
   event.preventDefault();
   const query=$('#searchInput')?.value.trim();
