@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="car-connect.css?v=20260808-driver-v1">
   <link rel="stylesheet" href="os-shell.css?v=20260802-0010">
   <link rel="stylesheet" href="moment.css?v=20260808-moment-v1">
-  <link rel="stylesheet" href="stable-web.css?v=20260802-0010">
+  <link rel="stylesheet" href="stable-web.css?v=20260808-playback-v6">
   <link rel="stylesheet" href="library.css?v=20260807-library-v1">
   <link rel="stylesheet" href="now-playing.css?v=20260808-ai-dj-v2">
   <link rel="stylesheet" href="listening-history.css?v=20260808-history-v1">
@@ -81,6 +81,8 @@
 
   <nav class="os-bottom-nav" aria-label="التنقل الرئيسي"><button class="os-nav-button is-active" data-os-target="home"><b>⌂</b>الرئيسية</button><button class="os-nav-button" data-os-target="search"><b>⌕</b>البحث</button><button class="os-nav-button" data-os-target="sessions"><b>✨</b>الجلسات</button><button class="os-nav-button" data-os-target="library"><b>♥</b>المكتبة</button><button class="os-nav-button" data-os-target="car"><b>🚗</b>السيارة</button><button class="os-nav-button" data-os-target="settings"><b>⚙</b>الإعدادات</button></nav>
 
+  <aside id="playbackRecovery" class="playback-recovery hidden" role="status" aria-live="assertive"><div><strong>🎧 صوت Asiri</strong><span id="playbackRecoveryText">يلزم تفعيل الصوت على هذا الجهاز.</span></div><button id="playbackRecoveryButton" type="button">🔊 تفعيل الصوت وتشغيل الأغنية</button></aside>
+
   <aside id="playerBar" class="player hidden" aria-label="مشغل Asiri Music"><button id="openNowPlaying" class="player-cover-button" type="button" aria-label="فتح شاشة التشغيل"><img id="playerCover" alt="غلاف الأغنية الحالية"></button><div><strong id="playerTitle">اختر أغنية</strong><span id="playerArtist"></span><span class="player-progress"><i id="playerProgress"></i></span></div><button id="prevButton" type="button" aria-label="السابق">⏮</button><button id="playButton" type="button" aria-label="تشغيل أو إيقاف">▶</button><button id="nextButton" type="button" aria-label="التالي">⏭</button></aside>
 
   <section id="nowPlaying" class="now-playing hidden" aria-label="التشغيل الآن">
@@ -102,8 +104,8 @@
   <script type="module" src="src/taste-engine.js?v=20260802-0010"></script>
   <script>window.onSpotifyWebPlaybackSDKReady=()=>window.dispatchEvent(new Event('asiri:spotify-sdk-ready'));</script>
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
-  <script src="src/playback-engine-v2.js?v=20260808-playback-v5"></script>
-  <script type="module" src="src/app.js?v=20260808-history-v1"></script>
+  <script src="src/playback-engine-v2.js?v=20260808-playback-v6"></script>
+  <script type="module" src="src/app.js?v=20260808-playback-v6"></script>
   <script type="module" src="src/now-playing.js?v=20260808-ai-dj-v2"></script>
   <script type="module" src="src/listening-history.js?v=20260808-history-v1"></script>
   <script type="module" src="src/smart-mix.js?v=20260808-smartmix-v1"></script>

@@ -18,6 +18,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
     this.lastPlaybackState=null;
     this.remoteQueueMode='batch';
     this.remoteQueueIndexes=new Set();
+    this.autoplayBlocked=false;
   }
 
   emit(type,detail={}){
@@ -58,7 +59,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
     this.player.addListener('ready',({device_id})=>{
       if(generation!==this.generation)return;
       this.deviceId=device_id;
-      this.onHealth(true,'Playback Engine v5 جاهز');
+      this.onHealth(true,'Playback Engine v6 جاهز');
       this.emit('playback-ready',{deviceId:device_id});
     });
     this.player.addListener('not_ready',({device_id})=>{
@@ -75,7 +76,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
         const found=this.queue.findIndex(item=>item.id===track.id||item.uri===track.uri||item.id===track.linked_from?.id);
         if(found>=0)this.index=found;
         if(found>=0&&found!==previousIndex&&this.remoteQueueMode==='single'){
-          this.primeNextTrack(this.deviceId).catch(error=>console.warn('[Playback Engine v5] queue prime',error));
+          this.primeNextTrack(this.deviceId).catch(error=>console.warn('[Playback Engine v6] queue prime',error));
         }
       }
       this.emit('player-state',{track,paused:state.paused,position:state.position,duration:state.duration,index:this.index,queue:[...this.queue]});
@@ -84,15 +85,22 @@ class AsiriPlaybackEngineV2 extends EventTarget{
     this.player.addListener('authentication_error',({message})=>this.fail(message||'يلزم تسجيل الدخول مجددًا'));
     this.player.addListener('account_error',({message})=>this.fail(message||'يتطلب التشغيل حساب Premium'));
     this.player.addListener('playback_error',({message})=>this.fail(message||'تعذر تشغيل Spotify'));
+    this.player.addListener('autoplay_failed',()=>{
+      this.autoplayBlocked=true;
+      const message='iPhone منع بدء الصوت تلقائيًا. اضغط لتفعيل الصوت وتشغيل الأغنية.';
+      this.onHealth(false,'يلزم تفعيل الصوت بضغطة على iPhone');
+      this.emit('autoplay-failed',{message});
+    });
   }
 
   fail(message){
-    console.error('[Playback Engine v5]',message);
+    console.error('[Playback Engine v6]',message);
     this.onHealth(false,message);
     this.emit('playback-error',{message});
   }
 
   async activateFromGesture(){
+    this.autoplayBlocked=false;
     if(!this.player&&window.Spotify?.Player)this.createPlayer(++this.generation);
     if(this.player?.activateElement)return this.player.activateElement();
     await this.connect();
@@ -166,6 +174,11 @@ class AsiriPlaybackEngineV2 extends EventTarget{
     const started=Date.now();
     let resumed=false;
     while(Date.now()-started<timeout){
+      if(this.autoplayBlocked){
+        const error=new Error('iPhone منع بدء الصوت تلقائيًا.');
+        error.code='AUTOPLAY_BLOCKED';
+        throw error;
+      }
       let state=this.lastPlaybackState;
       try{state=await this.player?.getCurrentState?.()||state}catch{}
       if(this.trackMatchesState(state,track)){
@@ -205,7 +218,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
         return nextIndex;
       }catch(error){
         const status=Number(error?.status)||0;
-        console.warn('[Playback Engine v5] skipped unavailable next item',error);
+        console.warn('[Playback Engine v6] skipped unavailable next item',error);
         if(status===401||status===429||status>=500)return null;
       }
     }
@@ -239,7 +252,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
         if(await this.waitForTrack(track)){
           this.remoteQueueMode='batch';
           this.remoteQueueIndexes.clear();
-          this.onHealth(true,'Playback Engine v5 يعمل');
+          this.onHealth(true,'Playback Engine v6 يعمل');
           this.onStatus(`يعمل الآن: ${track.name} — ${this.index+1} من ${this.queue.length} • التشغيل المستمر مفعّل`);
           this.emit('queue-mode',{mode:'continuous',queued:uris.length,total:uris.length});
           return track;
@@ -249,7 +262,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
       }catch(error){batchError=error}
 
       if(!this.shouldFallback(batchError,uris.length))throw batchError;
-      console.warn('[Playback Engine v5] batch start failed; retrying selected track only',batchError);
+      console.warn('[Playback Engine v6] batch start failed; retrying selected track only',batchError);
       this.lastPlaybackState=null;
       await this.sendStartPlayback(deviceId,[selectedUri],startPosition);
       if(!await this.waitForTrack(track,4200)){
@@ -261,7 +274,7 @@ class AsiriPlaybackEngineV2 extends EventTarget{
       this.remoteQueueMode='single';
       this.remoteQueueIndexes.clear();
       const primedIndex=await this.primeNextTrack(deviceId);
-      this.onHealth(true,'Playback Engine v5 يعمل');
+      this.onHealth(true,'Playback Engine v6 يعمل');
       this.onStatus(`يعمل الآن: ${track.name} • تم تثبيت التشغيل المباشر للأغنية المطلوبة`);
       this.emit('queue-mode',{mode:'resilient',queued:1+(primedIndex===null?0:1),total:uris.length});
       return track;

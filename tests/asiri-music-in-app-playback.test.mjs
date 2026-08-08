@@ -13,6 +13,9 @@ test('Asiri Music requests the official Spotify in-app playback permissions',asy
     assert.match(app,new RegExp(`['"]${scope}['"]`));
   }
   assert.doesNotMatch(app,/scopeVersion|PLAYBACK_AUTH_VERSION/);
+  assert.match(app,/PLAYBACK_SCOPES=\['streaming','user-read-playback-state','user-modify-playback-state'\]/);
+  assert.match(app,/missingPlaybackScopes\(\)/);
+  assert.match(app,/if\(payload\.scope\)set\('spotify\.scope',payload\.scope\)/);
   assert.match(app,/ensurePlaybackEngine\(\)\.connect\(\)/);
 });
 
@@ -24,7 +27,19 @@ test('the Spotify Web Playback SDK and Asiri playback engine load before the app
   const app=html.indexOf('src/app.js');
   assert.ok(sdkReady>=0&&sdk>sdkReady&&engine>sdk&&app>engine);
   assert.match(html,/▶ تشغيل هنا/);
-  assert.match(html,/playback-engine-v2\.js\?v=20260808-playback-v5/);
+  assert.match(html,/playback-engine-v2\.js\?v=20260808-playback-v6/);
+  assert.match(html,/app\.js\?v=20260808-playback-v6/);
+  assert.match(html,/id="playbackRecovery"/);
+});
+
+test('iPhone autoplay rejection is surfaced with an explicit same-track recovery path',async()=>{
+  const app=await read('src/app.js');
+  const engine=await read('src/playback-engine-v2.js');
+  assert.match(engine,/addListener\('autoplay_failed'/);
+  assert.match(engine,/error\.code='AUTOPLAY_BLOCKED'/);
+  assert.match(app,/pendingPlaybackRequest/);
+  assert.match(app,/playbackRecoveryButton/);
+  assert.match(app,/engine\.activateFromGesture\(\)/);
 });
 
 test('the regular iPhone shell no longer forces native Spotify playback',async()=>{
