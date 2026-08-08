@@ -24,7 +24,7 @@ test('the Spotify Web Playback SDK and Asiri playback engine load before the app
   const app=html.indexOf('src/app.js');
   assert.ok(sdkReady>=0&&sdk>sdkReady&&engine>sdk&&app>engine);
   assert.match(html,/▶ تشغيل هنا/);
-  assert.match(html,/playback-engine-v2\.js\?v=20260808-playback-v4/);
+  assert.match(html,/playback-engine-v2\.js\?v=20260808-playback-v5/);
 });
 
 test('the regular iPhone shell no longer forces native Spotify playback',async()=>{
