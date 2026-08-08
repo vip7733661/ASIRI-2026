@@ -57,6 +57,37 @@ test('an inactive Asiri device is transferred and confirmed active before audio 
   assert.ok(calls.slice(transferIndex+1,startIndex).some(call=>call.path==='/me/player/devices'));
 });
 
+test('an SDK-ready device can start audio even when Spotify available-devices does not list it yet',async()=>{
+  const Engine=await loadEngine(),calls=[];
+  let current='old';
+  const engine=new Engine({
+    getToken:async()=>'token',
+    api:async(path,options={})=>{
+      calls.push({path,options});
+      if(path==='/me/player/devices')return{devices:[]};
+      if(path.startsWith('/me/player/play'))current=JSON.parse(options.body).uris[0].split(':').at(-1);
+      return null;
+    }
+  });
+  engine.emit=()=>{};
+  engine.connect=async()=>'sdk-ready-device';
+  engine.player={getCurrentState:async()=>stateFor(current),resume:async()=>{}};
+  engine.setQueue([track('wanted')],{startIndex:0});
+
+  const played=await engine.playIndex(0);
+  assert.equal(played.id,'wanted');
+  assert.ok(calls.some(call=>call.path==='/me/player'));
+  assert.ok(calls.some(call=>call.path.startsWith('/me/player/play?device_id=sdk-ready-device')));
+});
+
+test('device discovery surfaces Spotify auth and quota errors instead of misreporting a missing device',async()=>{
+  const Engine=await loadEngine();
+  for(const status of [401,403,429]){
+    const engine=new Engine({getToken:async()=>'token',api:async()=>{const error=new Error('spotify '+status);error.status=status;throw error}});
+    await assert.rejects(engine.waitUntilDeviceVisible('sdk-device',100),error=>error.status===status);
+  }
+});
+
 test('reconnecting an existing Web Playback player keeps its ready-listener generation valid',async()=>{
   const Engine=await loadEngine();
   const engine=new Engine({getToken:async()=>'token',api:async()=>null});
