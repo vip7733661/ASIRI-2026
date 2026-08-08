@@ -17,13 +17,54 @@ async function loadEngine(){
 const track=id=>({id,name:`Track ${id}`,uri:`spotify:track:${id}`,artists:[{name:'Artist'}],album:{images:[]}});
 const stateFor=(id,paused=false)=>({paused,position:100,duration:180000,track_window:{current_track:{id,uri:`spotify:track:${id}`}}});
 
-test('playback preparation keeps the ready Asiri device active instead of pausing it',async()=>{
+test('playback preparation does not transfer an already active Asiri device',async()=>{
   const Engine=await loadEngine(),calls=[];
   const engine=new Engine({getToken:async()=>'token',api:async(...args)=>{calls.push(args)}});
   engine.connect=async()=>'asiri-device';
-  engine.waitUntilDeviceVisible=async()=>true;
+  engine.waitUntilDeviceVisible=async()=>({id:'asiri-device',is_active:true,is_restricted:false});
   assert.equal(await engine.prepareDevice(),'asiri-device');
   assert.equal(calls.length,0);
+});
+
+test('an inactive Asiri device is transferred and confirmed active before audio starts',async()=>{
+  const Engine=await loadEngine(),calls=[];
+  let active=false,current='old';
+  const engine=new Engine({
+    getToken:async()=>'token',
+    api:async(path,options={})=>{
+      calls.push({path,options});
+      if(path==='/me/player/devices')return{devices:[{id:'asiri-device',is_active:active,is_restricted:false}]};
+      if(path==='/me/player'){
+        active=true;
+        return null;
+      }
+      if(path.startsWith('/me/player/play'))current=JSON.parse(options.body).uris[0].split(':').at(-1);
+      return null;
+    }
+  });
+  engine.emit=()=>{};
+  engine.connect=async()=>'asiri-device';
+  engine.player={getCurrentState:async()=>stateFor(current),resume:async()=>{}};
+  engine.setQueue([track('wanted')],{startIndex:0});
+
+  const played=await engine.playIndex(0);
+  const transferIndex=calls.findIndex(call=>call.path==='/me/player');
+  const startIndex=calls.findIndex(call=>call.path.startsWith('/me/player/play'));
+  const transfer=calls[transferIndex];
+  assert.equal(played.id,'wanted');
+  assert.ok(transferIndex>=0&&startIndex>transferIndex);
+  assert.deepEqual(JSON.parse(transfer.options.body),{device_ids:['asiri-device'],play:false});
+  assert.ok(calls.slice(transferIndex+1,startIndex).some(call=>call.path==='/me/player/devices'));
+});
+
+test('reconnecting an existing Web Playback player keeps its ready-listener generation valid',async()=>{
+  const Engine=await loadEngine();
+  const engine=new Engine({getToken:async()=>'token',api:async()=>null});
+  engine.generation=7;
+  engine.waitForSdk=async()=>{};
+  engine.player={connect:async()=>{engine.deviceId='asiri-device';return true}};
+  assert.equal(await engine.connect(),'asiri-device');
+  assert.equal(engine.generation,7);
 });
 
 test('Asiri confirms the selected track after starting a healthy remaining queue',async()=>{
